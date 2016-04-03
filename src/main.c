@@ -7,6 +7,7 @@
 #include <time.h>
 #define ALLOC
 #include "globals.h"
+#include "gc/gc.h"
 
 PRIVATE void enterglobal()
 {
@@ -213,6 +214,11 @@ int main(int argc, char **argv)
 #endif
 	printf("Copyright 2001 by Manfred von Thun\n"); 
     }
+
+#ifdef GC_BDW
+	GC_INIT();
+#endif
+
     startclock = clock();
     gc_clock = 0;
     echoflag = INIECHOFLAG;
