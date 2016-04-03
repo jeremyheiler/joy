@@ -25,6 +25,8 @@ To build without a garbage collector, run:
 make nogc
 ```
 
+Debug builds can be made with `debug` or `nogcdebug` targets.
+
 [joy]: http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language
 [bdw]: http://hboehm.info/gc/
 [bdw-git]: https://github.com/ivmai/bdwgc
