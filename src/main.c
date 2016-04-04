@@ -4,7 +4,11 @@
 #include <string.h>
 #include <time.h>
 #define ALLOC
+
+#ifdef GC_BDW
 #include "gc/gc.h"
+#endif
+
 #include "globals.h"
 
 PRIVATE void enterglobal()
