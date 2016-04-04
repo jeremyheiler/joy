@@ -596,8 +596,8 @@ PRIVATE void mul_()
 PRIVATE void divide_()
 {
         TWOPARAMS("/");
-        if (stk->op == FLOAT_ && stk->u.dbl == 0.0
-            || stk->op == INTEGER_ && stk->u.num == 0)
+        if ((stk->op == FLOAT_ && stk->u.dbl == 0.0)
+            || (stk->op == INTEGER_ && stk->u.num == 0))
         {
                 execerror("non-zero divisor", "/");
         }
@@ -1147,7 +1147,7 @@ PRIVATE void fgets_()
 
 PRIVATE void fput_()
 {
-        FILE *stm;
+        FILE *stm = NULL;
         TWOPARAMS("fput");
         if (stk->next->op != FILE_ || (stm = stk->next->u.fil) == NULL)
         {
@@ -1173,7 +1173,7 @@ PRIVATE void fputch_()
 
 PRIVATE void fputchars_() /* suggested by Heiko Kuhrt, as "fputstring_" */
 {
-        FILE *stm;
+        FILE *stm = NULL;
         TWOPARAMS("fputchars");
         if (stk->next->op != FILE_ || (stm = stk->next->u.fil) == NULL)
         {
