@@ -306,7 +306,7 @@ PUSH(clock_, INTEGER_NEWNODE, (long)(clock() - startclock))
 PUSH(time_, INTEGER_NEWNODE, (long)time(NULL))
 PUSH(argc_, INTEGER_NEWNODE, (long)g_argc)
 
-PUBLIC void stack_(void)
+void stack_(void)
 {
         NULLARY(LIST_NEWNODE, stk);
 }
@@ -2074,7 +2074,7 @@ PRIVATE void get_()
         readfactor();
 }
 
-PUBLIC void dummy_(void)
+void dummy_(void)
 {
         /* never called */
 }
@@ -2107,7 +2107,7 @@ HELP(h_help1_, ==)
 
 /* - - - - -   C O M B I N A T O R S   - - - - - */
 
-PUBLIC void exeterm(Node *n)
+void exeterm(Node *n)
 {
         Node *stepper;
 start:
@@ -4063,7 +4063,7 @@ static struct
 
         {0, dummy_, "->", "->"}};
 
-PUBLIC void inisymboltable(void) /* initialise			*/
+void inisymboltable(void) /* initialise			*/
 {
         int i;
         char *s;
@@ -4226,7 +4226,7 @@ PRIVATE void manual_list_()
         stk = LIST_NEWNODE(n, stk);
 }
 
-PUBLIC char *opername(int o)
+char *opername(int o)
 {
         return optable[(short)o].name;
 }

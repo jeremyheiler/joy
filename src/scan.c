@@ -18,13 +18,13 @@ static char linbuf[INPLINEMAX];
 static int linelength, currentcolumn = 0;
 static int errorcount = 0;
 
-PUBLIC void inilinebuffer(void)
+void inilinebuffer(void)
 {
         ilevel = 0;
         infile[ilevel] = srcfile;
 }
 
-PUBLIC void putline(void)
+void putline(void)
 {
         if (echoflag > 2)
         {
@@ -74,12 +74,12 @@ PRIVATE void getch()
         ch = linbuf[currentcolumn++];
 }
 
-PUBLIC int endofbuffer(void)
+int endofbuffer(void)
 {
         return (currentcolumn == linelength);
 }
 
-PUBLIC void error(char *message)
+void error(char *message)
 {
         int i;
         putline();
@@ -102,7 +102,7 @@ PUBLIC void error(char *message)
         errorcount++;
 }
 
-PUBLIC int doinclude(char *filnam)
+int doinclude(char *filnam)
 {
         if (ilevel + 1 == INPSTACKMAX)
         {
@@ -163,7 +163,7 @@ PRIVATE char specialchar()
         }
 }
 
-PUBLIC void getsym(void)
+void getsym(void)
 {
 start:
         while (ch <= ' ')

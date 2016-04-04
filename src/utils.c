@@ -16,7 +16,7 @@ static int nodesinspected, nodescopied;
 static int start_gc_clock;
 #endif
 
-PUBLIC void inimem1(void)
+void inimem1(void)
 {
         stk = conts = dump = dump1 = dump2 = dump3 = dump4 = dump5 = NULL;
 #ifndef GC_BDW
@@ -25,7 +25,7 @@ PUBLIC void inimem1(void)
 #endif
 }
 
-PUBLIC void inimem2(void)
+void inimem2(void)
 {
 #ifndef GC_BDW
         mem_low = memoryindex;
@@ -45,7 +45,7 @@ PUBLIC void inimem2(void)
 #endif
 }
 
-PUBLIC void printnode(Node *p)
+void printnode(Node *p)
 {
 #ifndef GC_BDW
         printf("%10ld:        %-10s %10ld %10ld\n", MEM2INT(p),
@@ -185,7 +185,7 @@ PRIVATE void gc2(mess) char *mess;
 }
 #endif
 
-PUBLIC void gc_(void)
+void gc_(void)
 {
 #ifndef GC_BDW
         gc1("user requested");
@@ -195,7 +195,7 @@ PUBLIC void gc_(void)
 #endif
 }
 
-PUBLIC Node *newnode(Operator o, Types u, Node *r)
+Node *newnode(Operator o, Types u, Node *r)
 {
         Node *p;
 #ifndef GC_BDW
@@ -225,7 +225,7 @@ PUBLIC Node *newnode(Operator o, Types u, Node *r)
         return p;
 }
 
-PUBLIC void memoryindex_(void)
+void memoryindex_(void)
 {
 #ifndef GC_BDW
         stk = INTEGER_NEWNODE((long)MEM2INT(memoryindex), stk);
@@ -273,7 +273,7 @@ PRIVATE void readmodule_field(void)
         return;
 }
 
-PUBLIC void readfactor(void) /* read a JOY factor */
+void readfactor(void) /* read a JOY factor */
 {
         switch (sym)
         {
@@ -384,7 +384,7 @@ PUBLIC void readfactor(void) /* read a JOY factor */
                 }
         }
 }
-PUBLIC void readterm(void)
+void readterm(void)
 {
         stk = LIST_NEWNODE(0L, stk);
         if (sym <= ATOM)
@@ -408,7 +408,7 @@ PUBLIC void readterm(void)
         }
 }
 
-PUBLIC void writefactor(Node *n, FILE *stm)
+void writefactor(Node *n, FILE *stm)
 {
         if (n == NULL)
         {
@@ -504,7 +504,7 @@ PUBLIC void writefactor(Node *n, FILE *stm)
                 }
         }
 }
-PUBLIC void writeterm(Node *n, FILE *stm)
+void writeterm(Node *n, FILE *stm)
 {
         while (n != NULL)
         {

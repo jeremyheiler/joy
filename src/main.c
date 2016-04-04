@@ -23,7 +23,7 @@ PRIVATE void enterglobal()
         hashentry[hashvalue] = location;
 }
 
-PUBLIC void lookup(void)
+void lookup(void)
 {
         int i;
         D(printf("%s  hashes to %d\n", id, hashvalue));
@@ -209,18 +209,18 @@ PRIVATE void compound_def()
 jmp_buf begin;
 jmp_buf fail;
 
-PUBLIC void abortexecution_(void)
+void abortexecution_(void)
 {
         conts = dump = dump1 = dump2 = dump3 = dump4 = dump5 = NULL;
         longjmp(begin, 0);
 }
 
-PUBLIC void fail_(void)
+void fail_(void)
 {
         longjmp(fail, 1);
 }
 
-PUBLIC void execerror(char *message, char *op)
+void execerror(char *message, char *op)
 {
         printf("run time error: %s needed for %s\n", message, op);
         abortexecution_();
@@ -229,7 +229,7 @@ PUBLIC void execerror(char *message, char *op)
 static int quit_quiet
     = 1; /* was = 0;  but anything with "clock" needs revision */
 
-PUBLIC void quit_(void)
+void quit_(void)
 {
         long totaltime;
         if (quit_quiet)

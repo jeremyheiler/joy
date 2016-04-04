@@ -57,7 +57,6 @@
 #endif
 
 #define PRIVATE static
-#define PUBLIC
 
 /* types			*/
 typedef int Symbol;
@@ -153,31 +152,31 @@ CLASS Node /* dynamic memory	*/
 */
 
 /* Public procedures: */
-PUBLIC void stack_(void);
-PUBLIC void dummy_(void);
-PUBLIC void exeterm(Node *n);
-PUBLIC void inisymboltable(void) /* initialise			*/;
-PUBLIC char *opername(int o);
-PUBLIC void lookup(void);
-PUBLIC void abortexecution_(void);
-PUBLIC void execerror(char *message, char *op);
-PUBLIC void quit_(void);
-PUBLIC void inilinebuffer(void);
-PUBLIC void putline(void);
-PUBLIC int endofbuffer(void);
-PUBLIC void error(char *message);
-PUBLIC int doinclude(char *filnam);
-PUBLIC void getsym(void);
-PUBLIC void inimem1(void);
-PUBLIC void inimem2(void);
-PUBLIC void printnode(Node *p);
-PUBLIC void gc_(void);
-PUBLIC Node *newnode(Operator o, Types u, Node *r);
-PUBLIC void memoryindex_(void);
-PUBLIC void readfactor(void) /* read a JOY factor		*/;
-PUBLIC void readterm(void);
-PUBLIC void writefactor(Node *n, FILE *stm);
-PUBLIC void writeterm(Node *n, FILE *stm);
+void stack_(void);
+void dummy_(void);
+void exeterm(Node *n);
+void inisymboltable(void) /* initialise			*/;
+char *opername(int o);
+void lookup(void);
+void abortexecution_(void);
+void execerror(char *message, char *op);
+void quit_(void);
+void inilinebuffer(void);
+void putline(void);
+int endofbuffer(void);
+void error(char *message);
+int doinclude(char *filnam);
+void getsym(void);
+void inimem1(void);
+void inimem2(void);
+void printnode(Node *p);
+void gc_(void);
+Node *newnode(Operator o, Types u, Node *r);
+void memoryindex_(void);
+void readfactor(void) /* read a JOY factor		*/;
+void readterm(void);
+void writefactor(Node *n, FILE *stm);
+void writeterm(Node *n, FILE *stm);
 
 #define USR_NEWNODE(u, r) (bucket.ent = u, newnode(USR_, bucket, r))
 #define ANON_FUNCT_NEWNODE(u, r)                                               \
