@@ -27,13 +27,27 @@ make nogc
 
 Debug builds can be made with `debug` or `nogcdebug` targets.
 
+## Running
+
+The Rejoice interpreter can be used in two ways.
+
+To load and interpret a program, pass the program file as the only
+argument:
+
+```
+joy your-program.joy
+```
+
+To start a REPL, pass in zero arguments:
+
+```
+joy
+```
+
+In either case, if the current directory contains the file
+`usrlib.joy`, the interpretor will load it before running your program
+or starting the REPL.
+
 [joy]: http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language
 [bdw]: http://hboehm.info/gc/
 [bdw-git]: https://github.com/ivmai/bdwgc
-
-## Running
-
-Because I blindly reorganized the code, in order to successfully run
-the interpreter is to be in the `lib` directory. So, if you've built
-the executable in the project root, `cd` into `lib` and then run
-`../joy` to start the REPL.
