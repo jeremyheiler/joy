@@ -89,31 +89,25 @@ typedef struct Entry
         struct Entry *next;
 } Entry;
 
-#ifdef ALLOC
-#define CLASS
-#else
-#define CLASS extern
-#endif
+FILE *srcfile;
+int g_argc;
+char **g_argv;
+int echoflag;
+int autoput;
+int undeferror;
+int tracegc;
+int startclock, gc_clock; /* main		*/
+int ch;                   /* scanner	*/
+Symbol sym;
+long num;
+double dbl;
+char id[ALEN];
+int hashvalue;
+Types bucket; /* used by NEWNODE defines */
+int display_enter;
+int display_lookup;
 
-CLASS FILE *srcfile;
-CLASS int g_argc;
-CLASS char **g_argv;
-CLASS int echoflag;
-CLASS int autoput;
-CLASS int undeferror;
-CLASS int tracegc;
-CLASS int startclock, gc_clock; /* main		*/
-CLASS int ch;                   /* scanner	*/
-CLASS Symbol sym;
-CLASS long num;
-CLASS double dbl;
-CLASS char id[ALEN];
-CLASS int hashvalue;
-CLASS Types bucket; /* used by NEWNODE defines */
-CLASS int display_enter;
-CLASS int display_lookup;
-
-CLASS Entry /* symbol table	*/
+Entry /* symbol table	*/
     symtab[SYMTABMAX],
     *hashentry[HASHSIZE], *localentry, *symtabindex, *display[DISPLAYMAX],
     *firstlibra, /* inioptable	*/
@@ -122,7 +116,7 @@ CLASS Entry /* symbol table	*/
 #define LOC2INT(e) (((long)e - (long)symtab) / sizeof(Entry))
 #define INT2LOC(x) ((Entry *)((x + (long)symtab)) * sizeof(Entry))
 
-CLASS Node /* dynamic memory	*/
+Node /* dynamic memory	*/
            /*
                memory[MEMORYMAX],
                *memoryindex,

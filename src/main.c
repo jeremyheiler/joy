@@ -6,8 +6,6 @@
 #include <time.h>
 #include <math.h>
 
-#define ALLOC
-
 #include "globals.h"
 
 #ifdef GC_BDW
