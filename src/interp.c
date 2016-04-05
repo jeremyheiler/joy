@@ -1,17 +1,3 @@
-#include "globals.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-#ifdef GC_BDW
-#include "gc/gc.h"
-#define malloc GC_malloc_atomic
-#define realloc GC_realloc
-#define free(X)
-#endif
-
 PRIVATE void helpdetail_();
 PRIVATE void undefs_();
 PRIVATE void make_manual(int style /* 0=plain, 1=html, 2=latex */);

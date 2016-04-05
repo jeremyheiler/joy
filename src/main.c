@@ -1,15 +1,29 @@
-#include <setjmp.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <setjmp.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
+
 #define ALLOC
+
+#include "globals.h"
 
 #ifdef GC_BDW
 #include "gc/gc.h"
+/*
+ * These are defined for when the program is built without the GC.
+ */
+#define malloc GC_malloc_atomic
+#define realloc GC_realloc
+#define free(X)
 #endif
 
-#include "globals.h"
+#include "utils.c"
+#include "scan.c"
+#include "interp.c"
+
 
 PRIVATE void enterglobal()
 {

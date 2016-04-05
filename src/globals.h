@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 /* configure			*/
 #define SHELLESCAPE '$'
 #define INPSTACKMAX 10

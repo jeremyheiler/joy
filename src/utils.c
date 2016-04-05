@@ -1,12 +1,3 @@
-#include "globals.h"
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-
-#ifdef GC_BDW
-#include "gc/gc.h"
-#endif
-
 #ifndef GC_BDW
 static Node memory[MEMORYMAX], *memoryindex = memory, *mem_low = memory,
                                *mem_mid;

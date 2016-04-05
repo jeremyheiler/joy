@@ -1,14 +1,3 @@
-#include "globals.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef GC_BDW
-#include "gc/gc.h"
-#define malloc GC_malloc_atomic
-#endif
-
 #define EOLN '\n'
 
 static FILE *infile[INPSTACKMAX];
