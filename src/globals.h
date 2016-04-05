@@ -54,8 +54,6 @@
 #define D(x)
 #endif
 
-#define PRIVATE static
-
 /* types			*/
 typedef int Symbol;
 

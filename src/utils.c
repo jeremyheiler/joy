@@ -46,7 +46,7 @@ void printnode(Node *p)
 }
 
 #ifndef GC_BDW
-PRIVATE Node *copy(n) Node *n;
+static Node *copy(n) Node *n;
 {
         Node *temp;
         nodesinspected++;
@@ -116,7 +116,7 @@ PRIVATE Node *copy(n) Node *n;
 #endif
 
 #ifndef GC_BDW
-PRIVATE void gc1(mess) char *mess;
+static void gc1(mess) char *mess;
 {
         start_gc_clock = clock();
         if (tracegc > 1)
@@ -161,7 +161,7 @@ PRIVATE void gc1(mess) char *mess;
         COP(dump5, "dump5");
 }
 
-PRIVATE void gc2(mess) char *mess;
+static void gc2(mess) char *mess;
 {
         int this_gc_clock;
         this_gc_clock = clock() - start_gc_clock;
@@ -225,7 +225,7 @@ void memoryindex_(void)
 #endif
 }
 
-PRIVATE void readmodule_field(void)
+static void readmodule_field(void)
 {
         Entry *p;
         D(printf("Module %s at %d\n", location->name, (long)location));

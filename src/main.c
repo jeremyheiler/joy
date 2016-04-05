@@ -25,7 +25,7 @@
 #include "interp.c"
 
 
-PRIVATE void enterglobal()
+static void enterglobal()
 {
         location = symtabindex++;
         D(printf("getsym, new: '%s'\n", id));
@@ -66,7 +66,7 @@ void lookup(void)
         }
 }
 
-PRIVATE void enteratom()
+static void enteratom()
 {
         if (display_enter > 0)
         {
@@ -85,10 +85,10 @@ PRIVATE void enteratom()
         }
 }
 
-PRIVATE void defsequence();
-PRIVATE void compound_def();
+static void defsequence();
+static void compound_def();
 
-PRIVATE void definition()
+static void definition()
 {
         Entry *here = NULL;
         if (sym == LIBRA || sym == JPRIVATE || sym == HIDE || sym == MODULE)
@@ -135,7 +135,7 @@ PRIVATE void definition()
         stk = stk->next;
 }
 
-PRIVATE void defsequence()
+static void defsequence()
 {
         definition();
         while (sym == SEMICOL)
@@ -145,7 +145,7 @@ PRIVATE void defsequence()
         }
 }
 
-PRIVATE void compound_def()
+static void compound_def()
 {
         switch (sym)
         {

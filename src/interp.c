@@ -1,8 +1,8 @@
-PRIVATE void helpdetail_();
-PRIVATE void undefs_();
-PRIVATE void make_manual(int style /* 0=plain, 1=html, 2=latex */);
-PRIVATE void manual_list_();
-PRIVATE void manual_list_aux_();
+static void helpdetail_();
+static void undefs_();
+static void make_manual(int style /* 0=plain, 1=html, 2=latex */);
+static void manual_list_();
+static void manual_list_aux_();
 
 #define ONEPARAM(NAME)                                                         \
         if (stk == NULL)                                                       \
@@ -264,7 +264,7 @@ PRIVATE void manual_list_aux_();
 /* - - - -  O P E R A N D S   - - - - */
 
 #define PUSH(PROCEDURE, CONSTRUCTOR, VALUE)                                    \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 NULLARY(CONSTRUCTOR, VALUE);                                   \
         }
@@ -299,12 +299,12 @@ void stack_(void)
 
 /* - - - - -   O P E R A T O R S   - - - - - */
 
-PRIVATE void id_()
+static void id_()
 {
         /* do nothing */
 }
 
-PRIVATE void unstack_()
+static void unstack_()
 {
         ONEPARAM("unstack");
         LIST("unstack");
@@ -312,7 +312,7 @@ PRIVATE void unstack_()
 }
 
 /*
-PRIVATE void newstack_()
+static void newstack_()
 {
         stk = NULL;
 }
@@ -320,14 +320,14 @@ PRIVATE void newstack_()
 
 /* - - -   STACK   - - - */
 
-PRIVATE void name_()
+static void name_()
 {
         ONEPARAM("name");
         UNARY(STRING_NEWNODE,
               stk->op == USR_ ? stk->u.ent->name : opername(stk->op));
 }
 
-PRIVATE void intern_()
+static void intern_()
 {
         char *p;
         ONEPARAM("intern");
@@ -351,27 +351,27 @@ PRIVATE void intern_()
         }
 }
 
-PRIVATE void getenv_()
+static void getenv_()
 {
         ONEPARAM("getenv");
         STRING("getenv");
         UNARY(STRING_NEWNODE, getenv(stk->u.str));
 }
 
-PRIVATE void body_()
+static void body_()
 {
         ONEPARAM("body");
         USERDEF("body");
         UNARY(LIST_NEWNODE, stk->u.ent->u.body);
 }
 
-PRIVATE void pop_()
+static void pop_()
 {
         ONEPARAM("pop");
         POP(stk);
 }
 
-PRIVATE void swap_()
+static void swap_()
 {
         TWOPARAMS("swap");
         SAVESTACK;
@@ -380,7 +380,7 @@ PRIVATE void swap_()
         POP(dump);
 }
 
-PRIVATE void rollup_()
+static void rollup_()
 {
         THREEPARAMS("rollup");
         SAVESTACK;
@@ -390,7 +390,7 @@ PRIVATE void rollup_()
         POP(dump);
 }
 
-PRIVATE void rolldown_()
+static void rolldown_()
 {
         THREEPARAMS("rolldown");
         SAVESTACK;
@@ -400,7 +400,7 @@ PRIVATE void rolldown_()
         POP(dump);
 }
 
-PRIVATE void rotate_()
+static void rotate_()
 {
         THREEPARAMS("rotate");
         SAVESTACK;
@@ -410,14 +410,14 @@ PRIVATE void rotate_()
         POP(dump);
 }
 
-PRIVATE void dup_()
+static void dup_()
 {
         ONEPARAM("dup");
         GNULLARY(stk->op, stk->u);
 }
 
 #define DIPPED(PROCEDURE, NAME, PARAMCOUNT, ARGUMENT)                          \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 PARAMCOUNT(NAME);                                              \
                 SAVESTACK;                                                     \
@@ -437,7 +437,7 @@ DIPPED(rotated_, "rotated", FOURPARAMS, rotate_)
 /* - - -   BOOLEAN   - - - */
 
 #define ANDORXOR(PROCEDURE, NAME, OPER1, OPER2)                                \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 SAME2TYPES(NAME);                                              \
@@ -468,7 +468,7 @@ ANDORXOR(xor_, "xor", ^, !=)
 /* - - -   INTEGER   - - - */
 
 #define ORDCHR(PROCEDURE, NAME, RESULTTYP)                                     \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 NUMERICTYPE(NAME);                                             \
@@ -478,7 +478,7 @@ ANDORXOR(xor_, "xor", ^, !=)
 ORDCHR(ord_, "ord", INTEGER_NEWNODE)
 ORDCHR(chr_, "chr", CHAR_NEWNODE)
 
-PRIVATE void abs_()
+static void abs_()
 {
         ONEPARAM("abs");
         /* start new */
@@ -504,7 +504,7 @@ PRIVATE void abs_()
         }
 }
 
-PRIVATE double fsgn(double f)
+static double fsgn(double f)
 {
         if (f < 0)
         {
@@ -520,7 +520,7 @@ PRIVATE double fsgn(double f)
         }
 }
 
-PRIVATE void sign_()
+static void sign_()
 {
         ONEPARAM("sign");
         /* start new */
@@ -551,7 +551,7 @@ PRIVATE void sign_()
         }
 }
 
-PRIVATE void neg_()
+static void neg_()
 {
         ONEPARAM("neg");
         FLOAT_U(-);
@@ -561,7 +561,7 @@ PRIVATE void neg_()
 
 /* probably no longer needed:
 #define MULDIV(PROCEDURE,NAME,OPER,CHECK)			\
-PRIVATE void PROCEDURE()					\
+static void PROCEDURE()					\
 {   TWOPARAMS(NAME);						\
     FLOAT_I(OPER);						\
     INTEGERS2(NAME);						\
@@ -571,7 +571,7 @@ MULDIV(mul_,"*",*,)
 MULDIV(divide_,"/",/,CHECKZERO("/"))
 */
 
-PRIVATE void mul_()
+static void mul_()
 {
         TWOPARAMS("*");
         FLOAT_I(*);
@@ -579,7 +579,7 @@ PRIVATE void mul_()
         BINARY(INTEGER_NEWNODE, stk->next->u.num * stk->u.num);
 }
 
-PRIVATE void divide_()
+static void divide_()
 {
         TWOPARAMS("/");
         if ((stk->op == FLOAT_ && stk->u.dbl == 0.0)
@@ -592,7 +592,7 @@ PRIVATE void divide_()
         BINARY(INTEGER_NEWNODE, stk->next->u.num / stk->u.num);
 }
 
-PRIVATE void rem_()
+static void rem_()
 {
         TWOPARAMS("rem");
         FLOAT_P(fmod);
@@ -601,7 +601,7 @@ PRIVATE void rem_()
         BINARY(INTEGER_NEWNODE, stk->next->u.num % stk->u.num);
 }
 
-PRIVATE void div_()
+static void div_()
 {
         ldiv_t result;
         TWOPARAMS("div");
@@ -612,7 +612,7 @@ PRIVATE void div_()
         NULLARY(INTEGER_NEWNODE, result.rem);
 }
 
-PRIVATE void strtol_()
+static void strtol_()
 {
         TWOPARAMS("strtol");
         SAVESTACK;
@@ -623,14 +623,14 @@ PRIVATE void strtol_()
         POP(dump);
 }
 
-PRIVATE void strtod_()
+static void strtod_()
 {
         ONEPARAM("strtod");
         STRING("strtod");
         UNARY(FLOAT_NEWNODE, strtod(stk->u.str, NULL));
 }
 
-PRIVATE void format_()
+static void format_()
 {
         int width, prec;
         char spec;
@@ -659,7 +659,7 @@ PRIVATE void format_()
         return;
 }
 
-PRIVATE void formatf_()
+static void formatf_()
 {
         int width, prec;
         char spec;
@@ -691,7 +691,7 @@ PRIVATE void formatf_()
 /* - - -   TIME   - - - */
 
 #define UNMKTIME(PROCEDURE, NAME, FUNC)                                        \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 struct tm *t;                                                  \
                 long wday;                                                     \
@@ -723,7 +723,7 @@ PRIVATE void formatf_()
 UNMKTIME(localtime_, "localtime", localtime)
 UNMKTIME(gmtime_, "gmtime", gmtime)
 
-PRIVATE void decode_time(struct tm *t)
+static void decode_time(struct tm *t)
 {
         Node *p;
         t->tm_year = t->tm_mon = t->tm_mday = t->tm_hour = t->tm_min = t->tm_sec
@@ -777,7 +777,7 @@ PRIVATE void decode_time(struct tm *t)
         return;
 }
 
-PRIVATE void mktime_()
+static void mktime_()
 {
         struct tm t;
         ONEPARAM("mktime");
@@ -787,7 +787,7 @@ PRIVATE void mktime_()
         return;
 }
 
-PRIVATE void strftime_()
+static void strftime_()
 {
         struct tm t;
         char *fmt;
@@ -809,7 +809,7 @@ PRIVATE void strftime_()
 /* - - -   FLOAT   - - - */
 
 #define UFLOAT(PROCEDURE, NAME, FUNC)                                          \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 FLOAT(NAME);                                                   \
@@ -834,7 +834,7 @@ UFLOAT(tan_, "tan", tan)
 UFLOAT(tanh_, "tanh", tanh)
 
 #define BFLOAT(PROCEDURE, NAME, FUNC)                                          \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 FLOAT2(NAME);                                                  \
@@ -845,7 +845,7 @@ UFLOAT(tanh_, "tanh", tanh)
 BFLOAT(atan2_, "atan2", atan2)
 BFLOAT(pow_, "pow", pow)
 
-PRIVATE void frexp_()
+static void frexp_()
 {
         int exp;
         ONEPARAM("frexp");
@@ -855,7 +855,7 @@ PRIVATE void frexp_()
         return;
 }
 
-PRIVATE void modf_()
+static void modf_()
 {
         double exp;
         ONEPARAM("frexp");
@@ -865,7 +865,7 @@ PRIVATE void modf_()
         return;
 }
 
-PRIVATE void ldexp_()
+static void ldexp_()
 {
         long exp;
         TWOPARAMS("ldexp");
@@ -877,7 +877,7 @@ PRIVATE void ldexp_()
         return;
 }
 
-PRIVATE void trunc_()
+static void trunc_()
 {
         ONEPARAM("trunc");
         FLOAT("trunc");
@@ -887,7 +887,7 @@ PRIVATE void trunc_()
 /* - - -   NUMERIC   - - - */
 
 #define PREDSUCC(PROCEDURE, NAME, OPER)                                        \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 NUMERICTYPE(NAME);                                             \
@@ -905,7 +905,7 @@ PREDSUCC(pred_, "pred", -)
 PREDSUCC(succ_, "succ", +)
 
 #define PLUSMINUS(PROCEDURE, NAME, OPER)                                       \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 FLOAT_I(OPER);                                                 \
@@ -927,7 +927,7 @@ PLUSMINUS(plus_, "+", +)
 PLUSMINUS(minus_, "-", -)
 
 #define MAXMIN(PROCEDURE, NAME, OPER)                                          \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 if (FLOATABLE2)                                                \
@@ -958,7 +958,7 @@ MAXMIN(max_, "max", <)
 MAXMIN(min_, "min", >)
 
 #define COMPREL(PROCEDURE, NAME, CONSTRUCTOR, OPR)                             \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 long comp = 0;                                                 \
                 TWOPARAMS(NAME);                                               \
@@ -1043,7 +1043,7 @@ COMPREL(compare_, "compare", INTEGER_NEWNODE, +)
 
 /* - - -   FILES AND STREAMS   - - - */
 
-PRIVATE void fopen_()
+static void fopen_()
 {
         TWOPARAMS("fopen");
         STRING("fopen");
@@ -1052,7 +1052,7 @@ PRIVATE void fopen_()
         return;
 }
 
-PRIVATE void fclose_()
+static void fclose_()
 {
         ONEPARAM("fclose");
         if (stk->op == FILE_ && stk->u.fil == NULL)
@@ -1066,7 +1066,7 @@ PRIVATE void fclose_()
         return;
 }
 
-PRIVATE void fflush_()
+static void fflush_()
 {
         ONEPARAM("fflush");
         FILE("fflush");
@@ -1074,7 +1074,7 @@ PRIVATE void fflush_()
         return;
 }
 
-PRIVATE void fremove_()
+static void fremove_()
 {
         ONEPARAM("fremove");
         STRING("fremove");
@@ -1082,7 +1082,7 @@ PRIVATE void fremove_()
         return;
 }
 
-PRIVATE void frename_()
+static void frename_()
 {
         TWOPARAMS("frename");
         STRING("frename");
@@ -1092,7 +1092,7 @@ PRIVATE void frename_()
 }
 
 #define FILEGET(PROCEDURE, NAME, CONSTRUCTOR, EXPR)                            \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 FILE(NAME);                                                    \
@@ -1105,7 +1105,7 @@ FILEGET(ferror_, "ferror", BOOLEAN_NEWNODE, (long)ferror(stk->u.fil))
 FILEGET(fgetch_, "fgetch", CHAR_NEWNODE, (long)getc(stk->u.fil))
 FILEGET(ftell_, "ftell", INTEGER_NEWNODE, ftell(stk->u.fil))
 
-PRIVATE void fgets_()
+static void fgets_()
 {
         int length = 0;
         int size = INPLINEMAX;
@@ -1131,7 +1131,7 @@ PRIVATE void fgets_()
         return;
 }
 
-PRIVATE void fput_()
+static void fput_()
 {
         FILE *stm = NULL;
         TWOPARAMS("fput");
@@ -1145,7 +1145,7 @@ PRIVATE void fput_()
         return;
 }
 
-PRIVATE void fputch_()
+static void fputch_()
 {
         int ch;
         TWOPARAMS("fputch");
@@ -1157,7 +1157,7 @@ PRIVATE void fputch_()
         return;
 }
 
-PRIVATE void fputchars_() /* suggested by Heiko Kuhrt, as "fputstring_" */
+static void fputchars_() /* suggested by Heiko Kuhrt, as "fputstring_" */
 {
         FILE *stm = NULL;
         TWOPARAMS("fputchars");
@@ -1170,7 +1170,7 @@ PRIVATE void fputchars_() /* suggested by Heiko Kuhrt, as "fputstring_" */
         return;
 }
 
-PRIVATE void fread_()
+static void fread_()
 {
         unsigned char *buf;
         long count;
@@ -1192,7 +1192,7 @@ PRIVATE void fread_()
         return;
 }
 
-PRIVATE void fwrite_()
+static void fwrite_()
 {
         int length;
         int i;
@@ -1218,7 +1218,7 @@ PRIVATE void fwrite_()
         return;
 }
 
-PRIVATE void fseek_()
+static void fseek_()
 {
         long pos;
         int whence;
@@ -1236,7 +1236,7 @@ PRIVATE void fseek_()
 
 /* - - -   AGGREGATES   - - - */
 
-PRIVATE void first_()
+static void first_()
 {
         ONEPARAM("first");
         switch (stk->op)
@@ -1271,7 +1271,7 @@ PRIVATE void first_()
         }
 }
 
-PRIVATE void rest_()
+static void rest_()
 {
         ONEPARAM("rest");
         switch (stk->op)
@@ -1305,7 +1305,7 @@ PRIVATE void rest_()
         }
 }
 
-PRIVATE void uncons_()
+static void uncons_()
 {
         ONEPARAM("uncons");
         switch (stk->op)
@@ -1347,7 +1347,7 @@ PRIVATE void uncons_()
         }
 }
 
-PRIVATE void unswons_()
+static void unswons_()
 {
         ONEPARAM("unswons");
         switch (stk->op)
@@ -1383,9 +1383,9 @@ PRIVATE void unswons_()
         }
 }
 
-PRIVATE long equal_aux();
+static long equal_aux();
 
-PRIVATE int equal_list_aux(Node *n1, Node *n2)
+static int equal_list_aux(Node *n1, Node *n2)
 {
         if (n1 == NULL && n2 == NULL)
         {
@@ -1405,7 +1405,7 @@ PRIVATE int equal_list_aux(Node *n1, Node *n2)
         }
 }
 
-PRIVATE long equal_aux(Node *n1, Node *n2)
+static long equal_aux(Node *n1, Node *n2)
 {
         if (n1 == NULL && n2 == NULL)
         {
@@ -1449,14 +1449,14 @@ PRIVATE long equal_aux(Node *n1, Node *n2)
         }
 }
 
-PRIVATE void equal_()
+static void equal_()
 {
         TWOPARAMS("equal");
         BINARY(BOOLEAN_NEWNODE, equal_aux(stk, stk->next));
 }
 
 #define INHAS(PROCEDURE, NAME, AGGR, ELEM)                                     \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 int found = 0;                                                 \
                 TWOPARAMS(NAME);                                               \
@@ -1499,7 +1499,7 @@ INHAS(in_, "in", stk, stk->next)
 INHAS(has_, "has", stk->next, stk)
 
 #define OF_AT(PROCEDURE, NAME, AGGR, INDEX)                                    \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 if (INDEX->op != INTEGER_ || INDEX->u.num < 0)                 \
@@ -1565,7 +1565,7 @@ INHAS(has_, "has", stk->next, stk)
 OF_AT(of_, "of", stk, stk->next)
 OF_AT(at_, "at", stk->next, stk)
 
-PRIVATE void choice_()
+static void choice_()
 {
         THREEPARAMS("choice");
         if (stk->next->next->u.num)
@@ -1579,7 +1579,7 @@ PRIVATE void choice_()
         }
 }
 
-PRIVATE void case_()
+static void case_()
 {
         Node *n;
         TWOPARAMS("case");
@@ -1606,7 +1606,7 @@ PRIVATE void case_()
         }
 }
 
-PRIVATE void opcase_()
+static void opcase_()
 {
         Node *n;
         ONEPARAM("opcase");
@@ -1623,7 +1623,7 @@ PRIVATE void opcase_()
 }
 
 #define CONS_SWONS(PROCEDURE, NAME, AGGR, ELEM)                                \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 switch (AGGR->op)                                              \
@@ -1663,7 +1663,7 @@ PRIVATE void opcase_()
 CONS_SWONS(cons_, "cons", stk, stk->next)
 CONS_SWONS(swons_, "swons", stk->next, stk)
 
-PRIVATE void drop_()
+static void drop_()
 {
         int n = stk->u.num;
         TWOPARAMS("drop");
@@ -1715,7 +1715,7 @@ PRIVATE void drop_()
         }
 }
 
-PRIVATE void take_()
+static void take_()
 {
         int n = stk->u.num;
         TWOPARAMS("take");
@@ -1805,7 +1805,7 @@ PRIVATE void take_()
         }
 }
 
-PRIVATE void concat_()
+static void concat_()
 {
         TWOPARAMS("concat");
         SAME2TYPES("concat");
@@ -1862,7 +1862,7 @@ PRIVATE void concat_()
         }
 }
 
-PRIVATE void enconcat_()
+static void enconcat_()
 {
         THREEPARAMS("enconcat");
         SAME2TYPES("enconcat");
@@ -1871,7 +1871,7 @@ PRIVATE void enconcat_()
         concat_();
 }
 
-PRIVATE void null_()
+static void null_()
 {
         ONEPARAM("null");
         switch (stk->op)
@@ -1890,7 +1890,7 @@ PRIVATE void null_()
         }
 }
 
-PRIVATE void not_()
+static void not_()
 {
         ONEPARAM("not");
         switch (stk->op)
@@ -1912,7 +1912,7 @@ PRIVATE void not_()
         }
 }
 
-PRIVATE void size_()
+static void size_()
 {
         long siz = 0;
         ONEPARAM("size");
@@ -1949,7 +1949,7 @@ PRIVATE void size_()
         UNARY(INTEGER_NEWNODE, siz);
 }
 
-PRIVATE void small_()
+static void small_()
 {
         long sml = 0;
         ONEPARAM("small");
@@ -1988,7 +1988,7 @@ PRIVATE void small_()
 }
 
 #define TYPE(PROCEDURE, NAME, REL, TYP)                                        \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 UNARY(BOOLEAN_NEWNODE, (long)(stk->op REL TYP));               \
@@ -2006,7 +2006,7 @@ TYPE(file_, "file", ==, FILE_)
 TYPE(user_, "user", ==, USR_)
 
 #define USETOP(PROCEDURE, NAME, TYPE, BODY)                                    \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 TYPE(NAME);                                                    \
@@ -2025,7 +2025,7 @@ USETOP(srand_, "srand", INTEGER, srand((unsigned int)stk->u.num))
 USETOP(include_, "include", STRING, doinclude(stk->u.str))
 USETOP(system_, "system", STRING, system(stk->u.str))
 
-PRIVATE void undefs_(void)
+static void undefs_(void)
 {
         Entry *i = symtabindex;
         Node *n = 0;
@@ -2041,7 +2041,7 @@ PRIVATE void undefs_(void)
         stk = LIST_NEWNODE(n, stk);
 }
 
-PRIVATE void argv_()
+static void argv_()
 {
         int i;
         dump1 = LIST_NEWNODE(NULL, dump1);
@@ -2054,7 +2054,7 @@ PRIVATE void argv_()
         return;
 }
 
-PRIVATE void get_()
+static void get_()
 {
         getsym();
         readfactor();
@@ -2066,7 +2066,7 @@ void dummy_(void)
 }
 
 #define HELP(PROCEDURE, REL)                                                   \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 Entry *i = symtabindex;                                        \
                 int column = 0;                                                \
@@ -2165,14 +2165,14 @@ start:
         D(printf("\n"));
 }
 
-PRIVATE void x_()
+static void x_()
 {
         ONEPARAM("x");
         ONEQUOTE("x");
         exeterm(stk->u.lis);
 }
 
-PRIVATE void i_()
+static void i_()
 {
         ONEPARAM("i");
         ONEQUOTE("i");
@@ -2182,7 +2182,7 @@ PRIVATE void i_()
         POP(dump);
 }
 
-PRIVATE void dip_()
+static void dip_()
 {
         TWOPARAMS("dip");
         ONEQUOTE("dip");
@@ -2194,7 +2194,7 @@ PRIVATE void dip_()
 }
 
 #define N_ARY(PROCEDURE, NAME, PARAMCOUNT, TOP)                                \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 PARAMCOUNT(NAME);                                              \
                 ONEQUOTE(NAME);                                                \
@@ -2215,7 +2215,7 @@ N_ARY(binary_, "binary", THREEPARAMS, SAVED4)
 N_ARY(ternary_, "ternary", FOURPARAMS, SAVED5)
 
 /*
-PRIVATE void nullary_()
+static void nullary_()
 {
     ONEPARAM("nullary");
     SAVESTACK;
@@ -2226,7 +2226,7 @@ PRIVATE void nullary_()
 }
 */
 
-PRIVATE void times_()
+static void times_()
 {
         int i, n;
         TWOPARAMS("times");
@@ -2242,7 +2242,7 @@ PRIVATE void times_()
         POP(dump);
 }
 
-PRIVATE void infra_()
+static void infra_()
 {
         TWOPARAMS("infra");
         ONEQUOTE("infra");
@@ -2254,7 +2254,7 @@ PRIVATE void infra_()
         POP(dump);
 }
 
-PRIVATE void app1_()
+static void app1_()
 {
         TWOPARAMS("app1");
         ONEQUOTE("app1");
@@ -2264,7 +2264,7 @@ PRIVATE void app1_()
         POP(dump);
 }
 
-PRIVATE void cleave_()
+static void cleave_()
 { /*  X [P1] [P2] cleave ==>  X1 X2	*/
         THREEPARAMS("cleave");
         TWOQUOTES("cleave");
@@ -2281,7 +2281,7 @@ PRIVATE void cleave_()
         POP(dump);
 }
 
-PRIVATE void app11_()
+static void app11_()
 {
         THREEPARAMS("app11");
         ONEQUOTE("app11");
@@ -2289,7 +2289,7 @@ PRIVATE void app11_()
         stk->next = stk->next->next;
 }
 
-PRIVATE void unary2_()
+static void unary2_()
 { /*   Y  Z  [P]  unary2     ==>  Y'  Z'  */
         THREEPARAMS("unary2");
         ONEQUOTE("unary2");
@@ -2306,7 +2306,7 @@ PRIVATE void unary2_()
         POP(dump);
 }
 
-PRIVATE void unary3_()
+static void unary3_()
 { /*  X Y Z [P]  unary3    ==>  X' Y' Z'	*/
         FOURPARAMS("unary3");
         ONEQUOTE("unary3");
@@ -2326,7 +2326,7 @@ PRIVATE void unary3_()
         POP(dump);
 }
 
-PRIVATE void unary4_()
+static void unary4_()
 { /*  X Y Z W [P]  unary4    ==>  X' Y' Z' W'	*/
         FIVEPARAMS("unary4");
         ONEQUOTE("unary4");
@@ -2349,7 +2349,7 @@ PRIVATE void unary4_()
         POP(dump);
 }
 
-PRIVATE void app12_()
+static void app12_()
 {
         /*   X  Y  Z  [P]  app12  */
         THREEPARAMS("app12");
@@ -2357,7 +2357,7 @@ PRIVATE void app12_()
         stk->next->next = stk->next->next->next; /* delete X */
 }
 
-PRIVATE void map_()
+static void map_()
 {
         TWOPARAMS("map");
         ONEQUOTE("map");
@@ -2434,7 +2434,7 @@ PRIVATE void map_()
         POP(dump);
 }
 
-PRIVATE void step_()
+static void step_()
 {
         TWOPARAMS("step");
         ONEQUOTE("step");
@@ -2483,14 +2483,14 @@ PRIVATE void step_()
         POP(dump);
 }
 
-PRIVATE void fold_()
+static void fold_()
 {
         THREEPARAMS("fold");
         swapd_();
         step_();
 }
 
-PRIVATE void cond_()
+static void cond_()
 {
         int result = 0;
         ONEPARAM("cond");
@@ -2523,7 +2523,7 @@ PRIVATE void cond_()
 }
 
 #define IF_TYPE(PROCEDURE, NAME, TYP)                                          \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 TWOQUOTES(NAME);                                               \
@@ -2542,7 +2542,7 @@ IF_TYPE(iffloat_, "iffloat", FLOAT_)
 IF_TYPE(iffile_, "iffile", FILE_)
 IF_TYPE(iflist_, "iflist", LIST_)
 
-PRIVATE void filter_()
+static void filter_()
 {
         TWOPARAMS("filter");
         ONEQUOTE("filter");
@@ -2630,7 +2630,7 @@ PRIVATE void filter_()
         POP(dump);
 }
 
-PRIVATE void split_()
+static void split_()
 {
         TWOPARAMS("split");
         SAVESTACK;
@@ -2744,7 +2744,7 @@ PRIVATE void split_()
         POP(dump);
 }
 #define SOMEALL(PROCEDURE, NAME, INITIAL)                                      \
-        PRIVATE void PROCEDURE()                                               \
+        static void PROCEDURE()                                               \
         {                                                                      \
                 long result = INITIAL;                                         \
                 TWOPARAMS(NAME);                                               \
@@ -2815,7 +2815,7 @@ PRIVATE void split_()
 SOMEALL(some_, "some", 0L)
 SOMEALL(all_, "all", 1L)
 
-PRIVATE void primrec_()
+static void primrec_()
 {
         int n = 0;
         int i;
@@ -2882,7 +2882,7 @@ PRIVATE void primrec_()
         POP(dump);
 }
 
-PRIVATE void tailrecaux()
+static void tailrecaux()
 {
         int result;
 tailrec:
@@ -2902,7 +2902,7 @@ tailrec:
         }
 }
 
-PRIVATE void tailrec_()
+static void tailrec_()
 {
         THREEPARAMS("tailrec");
         SAVESTACK;
@@ -2911,7 +2911,7 @@ PRIVATE void tailrec_()
         POP(dump);
 }
 
-PRIVATE void construct_()
+static void construct_()
 { /* [P] [[P1] [P2] ..] -> X1 X2 ..	*/
         TWOPARAMS("construct");
         TWOQUOTES("construct");
@@ -2937,7 +2937,7 @@ PRIVATE void construct_()
         POP(dump);
 }
 
-PRIVATE void branch_()
+static void branch_()
 {
         THREEPARAMS("branch");
         TWOQUOTES("branch");
@@ -2947,7 +2947,7 @@ PRIVATE void branch_()
         POP(dump);
 }
 
-PRIVATE void while_()
+static void while_()
 {
         TWOPARAMS("while");
         TWOQUOTES("while");
@@ -2968,7 +2968,7 @@ PRIVATE void while_()
         POP(dump);
 }
 
-PRIVATE void ifte_()
+static void ifte_()
 {
         int result;
         THREEPARAMS("ifte");
@@ -2982,7 +2982,7 @@ PRIVATE void ifte_()
         POP(dump);
 }
 
-PRIVATE void condlinrecaux()
+static void condlinrecaux()
 {
         int result = 0;
         dump1 = newnode(LIST_, SAVED1->u, dump1);
@@ -3020,7 +3020,7 @@ PRIVATE void condlinrecaux()
         POP(dump1);
 }
 
-PRIVATE void condlinrec_()
+static void condlinrec_()
 {
         ONEPARAM("condlinrec");
         LIST("condlinrec");
@@ -3031,7 +3031,7 @@ PRIVATE void condlinrec_()
         POP(dump);
 }
 
-PRIVATE void condnestrecaux()
+static void condnestrecaux()
 {
         int result = 0;
         dump1 = newnode(LIST_, SAVED1->u, dump1);
@@ -3073,7 +3073,7 @@ PRIVATE void condnestrecaux()
         POP(dump1);
 }
 
-PRIVATE void condnestrec_()
+static void condnestrec_()
 {
         ONEPARAM("condnestrec");
         LIST("condnestrec");
@@ -3084,7 +3084,7 @@ PRIVATE void condnestrec_()
         POP(dump);
 }
 
-PRIVATE void linrecaux()
+static void linrecaux()
 {
         int result;
         dump1 = LIST_NEWNODE(stk, dump1);
@@ -3104,7 +3104,7 @@ PRIVATE void linrecaux()
         }
 }
 
-PRIVATE void linrec_()
+static void linrec_()
 {
         FOURPARAMS("linrec");
         FOURQUOTES("linrec");
@@ -3114,7 +3114,7 @@ PRIVATE void linrec_()
         POP(dump);
 }
 
-PRIVATE void binrecaux()
+static void binrecaux()
 {
         int result;
         dump1 = LIST_NEWNODE(stk, dump1);
@@ -3139,7 +3139,7 @@ PRIVATE void binrecaux()
         } /* combine */
 }
 
-PRIVATE void binrec_()
+static void binrec_()
 {
         FOURPARAMS("binrec");
         FOURQUOTES("binrec");
@@ -3149,7 +3149,7 @@ PRIVATE void binrec_()
         POP(dump);
 }
 
-PRIVATE void treestepaux(item) Node *item;
+static void treestepaux(item) Node *item;
 {
         if (item->op != LIST_)
         {
@@ -3168,7 +3168,7 @@ PRIVATE void treestepaux(item) Node *item;
         }
 }
 
-PRIVATE void treestep_()
+static void treestep_()
 {
         TWOPARAMS("treestep");
         ONEQUOTE("treestep");
@@ -3178,7 +3178,7 @@ PRIVATE void treestep_()
         POP(dump);
 }
 
-PRIVATE void treerecaux()
+static void treerecaux()
 {
         if (stk->next->op == LIST_)
         {
@@ -3196,7 +3196,7 @@ PRIVATE void treerecaux()
         }
 }
 
-PRIVATE void treerec_()
+static void treerec_()
 {
         THREEPARAMS("treerec");
         cons_();
@@ -3204,7 +3204,7 @@ PRIVATE void treerec_()
         treerecaux();
 }
 
-PRIVATE void genrecaux()
+static void genrecaux()
 {
         int result;
         D(printf("genrecaux: stack = ");)
@@ -3229,7 +3229,7 @@ PRIVATE void genrecaux()
         POP(dump);
 }
 
-PRIVATE void genrec_()
+static void genrec_()
 {
         FOURPARAMS("genrec");
         FOURQUOTES("genrec");
@@ -3239,7 +3239,7 @@ PRIVATE void genrec_()
         genrecaux();
 }
 
-PRIVATE void treegenrecaux()
+static void treegenrecaux()
 {
         D(printf("treegenrecaux: stack = ");)
         D(writeterm(stk, stdout); printf("\n");)
@@ -3262,7 +3262,7 @@ PRIVATE void treegenrecaux()
         } /*	[O1]	*/
 }
 
-PRIVATE void treegenrec_()
+static void treegenrec_()
 { /* T [O1] [O2] [C]	*/
         FOURPARAMS("treegenrec");
         cons_();
@@ -3271,22 +3271,22 @@ PRIVATE void treegenrec_()
         treegenrecaux();
 }
 
-PRIVATE void plain_manual_()
+static void plain_manual_()
 {
         make_manual(0);
 }
 
-PRIVATE void html_manual_()
+static void html_manual_()
 {
         make_manual(1);
 }
 
-PRIVATE void latex_manual_()
+static void latex_manual_()
 {
         make_manual(2);
 }
 
-PRIVATE void manual_list_aux_()
+static void manual_list_aux_()
 {
         manual_list_();
 }
@@ -4078,7 +4078,7 @@ void inisymboltable(void) /* initialise			*/
         firstlibra = symtabindex;
 }
 
-PRIVATE void helpdetail_()
+static void helpdetail_()
 {
         Node *n;
         ONEPARAM("HELP");
@@ -4127,7 +4127,7 @@ PRIVATE void helpdetail_()
                 printf("\n\n");                                                \
         }
 
-PRIVATE void make_manual(int style /* 0=plain, 1=HTML, 2=Latex */)
+static void make_manual(int style /* 0=plain, 1=HTML, 2=Latex */)
 {
         int i;
         char *n;
@@ -4193,7 +4193,7 @@ PRIVATE void make_manual(int style /* 0=plain, 1=HTML, 2=Latex */)
                 printf("\n</DL>\n</HTML>\n");
 }
 
-PRIVATE void manual_list_()
+static void manual_list_()
 {
         int i = -1;
         Node *tmp;

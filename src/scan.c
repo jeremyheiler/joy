@@ -26,7 +26,7 @@ void putline(void)
         printf("%s\n", linbuf);
 }
 
-PRIVATE void getch()
+static void getch()
 {
         char c;
         if (currentcolumn == linelength)
@@ -106,7 +106,7 @@ int doinclude(char *filnam)
         return 0;
 }
 
-PRIVATE char specialchar()
+static char specialchar()
 {
         getch();
         switch (ch)
