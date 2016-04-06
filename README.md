@@ -4,7 +4,8 @@ This is my fork of the [Joy programming language][joy].
 
 ## Building
 
-The only external dependency is the [Boehm-Demers-Weiser GC][bdw].
+The only external dependency is the [Boehm-Demers-Weiser][bdw] garbage
+collector.
 
 The latest development version of BDW, 7.5.0, includes better support
 for detecting `__alloc_size__` when using `clang`. Fortunately, this
@@ -25,11 +26,11 @@ To build without a garbage collector, run:
 make nogc
 ```
 
-Debug builds can be made with `debug` or `nogcdebug` targets.
+Debug builds can be made with the `debug` or `nogcdebug` targets.
 
 ## Running
 
-The Rejoice interpreter can be used in two ways.
+The interpreter can be used in two ways.
 
 To load and interpret a program, pass the program file as the only
 argument:
@@ -44,10 +45,10 @@ To start a REPL, pass in zero arguments:
 joy
 ```
 
-In either case, if the current directory contains the file
-`usrlib.joy`, the interpretor will load it before running your program
-or starting the REPL.
+If the current directory contains the file `usrlib.joy`, the
+interpretor will load it before running your program or starting the
+REPL.
 
-[joy]: http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language
+[joy]: https://en.wikipedia.org/wiki/Joy_(programming_language)
 [bdw]: http://hboehm.info/gc/
 [bdw-git]: https://github.com/ivmai/bdwgc
