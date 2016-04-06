@@ -45,8 +45,8 @@
 #define IN 1103
 #define END 1104
 #define MODULE 1105
-#define JPRIVATE 1106
-#define JPUBLIC 1107
+#define PRIVATE 1106
+#define PUBLIC 1107
 
 #ifdef DEBUG
 #define D(x) x

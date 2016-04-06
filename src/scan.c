@@ -327,12 +327,12 @@ start:
                                 }
                                 if (strcmp(id, "PRIVATE") == 0)
                                 {
-                                        sym = JPRIVATE;
+                                        sym = PRIVATE;
                                         return;
                                 }
                                 if (strcmp(id, "PUBLIC") == 0)
                                 {
-                                        sym = JPUBLIC;
+                                        sym = PUBLIC;
                                         return;
                                 }
                                 /* possibly other uppers here */

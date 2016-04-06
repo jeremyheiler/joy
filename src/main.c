@@ -89,7 +89,7 @@ static void compound_def();
 static void definition()
 {
         Entry *here = NULL;
-        if (sym == LIBRA || sym == JPRIVATE || sym == HIDE || sym == MODULE)
+        if (sym == LIBRA || sym == PRIVATE || sym == HIDE || sym == MODULE)
         {
                 compound_def();
                 if (sym == END || sym == PERIOD)
@@ -169,7 +169,7 @@ static void compound_def()
                         --display_lookup;
                         break;
                 }
-                case JPRIVATE:
+                case PRIVATE:
                 case HIDE:
                 {
                         getsym();
@@ -203,7 +203,7 @@ static void compound_def()
                         }
                         break;
                 }
-                case JPUBLIC:
+                case PUBLIC:
                 case LIBRA:
                 case IN:
                 {
