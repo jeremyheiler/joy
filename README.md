@@ -4,29 +4,34 @@ This is my fork of the [Joy programming language][joy].
 
 ## Building
 
-The only external dependency is the [Boehm-Demers-Weiser][bdw] garbage
-collector.
+There are no required external dependencies. To build the interpreter
+with a basic garbage collector, run `make`, or `make debug` for a
+debug build.
 
-The latest development version of BDW, 7.5.0, includes better support
-for detecting `__alloc_size__` when using `clang`. Fortunately, this
-is easy to install with `brew` if you're on OS X. If you'd rather
-install it yourself, or you're not on OS X and it isn't available with
-your package manager, clone the [repository][bdw-git], and follow
-their build instructions. Then update the `Makefile` to locate your
-build of BDW. (Hopefully this can be handled better in the future.)
+### BDW GC
+
+Optionally, to build the interpreter with the
+[Boehm-Demers-Weiser][bdw] garbage collector, first install the
+library with your package manager, or fetch the [source][bdw-git] and
+build it yourself.
+
+#### Mac OS X
+
+It is important to install the latest development version of BDW on OS
+X. The latest development version, currently 7.5.0, includes proper
+support for detecting `__alloc_size__` when compiling with `clang`.
 
 ```
 brew install bdw-gc --HEAD
-make
 ```
 
-To build without a garbage collector, run:
+#### Debian
 
 ```
-make nogc
+apt-get install libgc-dev
 ```
 
-Debug builds can be made with the `debug` or `nogcdebug` targets.
+Note: `Makefile` needs to be updated to have generic include paths.
 
 ## Running
 
@@ -47,7 +52,7 @@ rjc
 
 If the current directory contains the file `usrlib.joy`, the
 interpretor will load it before running your program or starting the
-REPL.
+REPL. (A file with this name exists in the project's `lib` directory.)
 
 [joy]: https://en.wikipedia.org/wiki/Joy_(programming_language)
 [bdw]: http://hboehm.info/gc/

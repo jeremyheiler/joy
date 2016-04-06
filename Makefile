@@ -4,16 +4,16 @@ GC=/usr/local/opt/bdw-gc/lib/libgc.a -I/usr/local/opt/bdw-gc/include
 EXE=rjc
 
 all:
-	$(CC) $(CFLAGS) -o $(EXE) -DGC_BDW $(SRC) $(GC)
-
-debug:
-	$(CC) $(CFLAGS) -o $(EXE) -DGC_BDW $(SRC) $(GC) -g -O0 -DDEBUG
-
-nogc:
 	$(CC) $(CFLAGS) -o $(EXE)          $(SRC)
 
-nogcdebug:
+debug:
 	$(CC) $(CFLAGS) -o $(EXE)          $(SRC) -g -O0 -DDEBUG
+
+bdw:
+	$(CC) $(CFLAGS) -o $(EXE) -DGC_BDW $(SRC) $(GC)
+
+bdw-debug:
+	$(CC) $(CFLAGS) -o $(EXE) -DGC_BDW $(SRC) $(GC) -g -O0 -DDEBUG
 
 clean:
 	@rm -rf $(EXE) $(EXE).dSYM
