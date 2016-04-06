@@ -16,4 +16,4 @@ nogcdebug:
 	$(CC) $(CFLAGS) -o $(EXE)          $(SRC) -g -O0 -DDEBUG
 
 clean:
-	@rm -rf joy joy.dSYM
+	@rm -rf $(EXE) $(EXE).dSYM
