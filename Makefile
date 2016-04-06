@@ -1,7 +1,7 @@
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -Isrc -lm
 SRC=src/main.c
 GC=/usr/local/opt/bdw-gc/lib/libgc.a -I/usr/local/opt/bdw-gc/include
-EXE=joy
+EXE=rjc
 
 all:
 	$(CC) $(CFLAGS) -o $(EXE) -DGC_BDW $(SRC) $(GC)

@@ -36,13 +36,13 @@ To load and interpret a program, pass the program file as the only
 argument:
 
 ```
-joy your-program.joy
+rjc your-program.joy
 ```
 
 To start a REPL, pass in zero arguments:
 
 ```
-joy
+rjc
 ```
 
 If the current directory contains the file `usrlib.joy`, the

@@ -290,13 +290,10 @@ int main(int argc, char **argv)
                 srcfile = stdin;
 
 #ifdef GC_BDW
-                printf("JOY  -  compiled at %s on %s (BDW)\n", __TIME__,
-                       __DATE__);
+                printf("Rejoice 0.0.1 BDW\n");
 #else
-                printf("JOY  -  compiled at %s on %s (NOBDW)\n", __TIME__,
-                       __DATE__);
+                printf("Rejoice 0.0.1\n");
 #endif
-                printf("Copyright 2001 by Manfred von Thun\n");
         }
 
 #ifdef GC_BDW
