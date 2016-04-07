@@ -264,7 +264,7 @@ static void manual_list_aux_();
 /* - - - -  O P E R A N D S   - - - - */
 
 #define PUSH(PROCEDURE, CONSTRUCTOR, VALUE)                                    \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 NULLARY(CONSTRUCTOR, VALUE);                                   \
         }
@@ -292,7 +292,7 @@ PUSH(clock_, INTEGER_NEWNODE, (long)(clock() - startclock))
 PUSH(time_, INTEGER_NEWNODE, (long)time(NULL))
 PUSH(argc_, INTEGER_NEWNODE, (long)g_argc)
 
-void stack_(void)
+void stack_()
 {
         NULLARY(LIST_NEWNODE, stk);
 }
@@ -417,7 +417,7 @@ static void dup_()
 }
 
 #define DIPPED(PROCEDURE, NAME, PARAMCOUNT, ARGUMENT)                          \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 PARAMCOUNT(NAME);                                              \
                 SAVESTACK;                                                     \
@@ -437,27 +437,33 @@ DIPPED(rotated_, "rotated", FOURPARAMS, rotate_)
 /* - - -   BOOLEAN   - - - */
 
 #define ANDORXOR(PROCEDURE, NAME, OPER1, OPER2)                                \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 SAME2TYPES(NAME);                                              \
                 switch (stk->next->op)                                         \
                 {                                                              \
                         case SET_:                                             \
+                        {                                                      \
                                 BINARY(SET_NEWNODE,                            \
                                        (long)(stk->next->u.set OPER1           \
                                                   stk->u.set));                \
                                 return;                                        \
+                        }                                                      \
                         case BOOLEAN_:                                         \
                         case CHAR_:                                            \
                         case INTEGER_:                                         \
                         case LIST_:                                            \
+                        {                                                      \
                                 BINARY(BOOLEAN_NEWNODE,                        \
                                        (long)(stk->next->u.num OPER2           \
                                                   stk->u.num));                \
                                 return;                                        \
+                        }                                                      \
                         default:                                               \
+                        {                                                      \
                                 BADDATA(NAME);                                 \
+                        }                                                      \
                 }                                                              \
         }
 
@@ -468,7 +474,7 @@ ANDORXOR(xor_, "xor", ^, !=)
 /* - - -   INTEGER   - - - */
 
 #define ORDCHR(PROCEDURE, NAME, RESULTTYP)                                     \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 NUMERICTYPE(NAME);                                             \
@@ -652,7 +658,11 @@ static void format_()
         }
         strcpy(format, "%*.*ld");
         format[5] = spec;
+#ifdef GC_BDW
+        result = GC_malloc_atomic(INPLINEMAX);
+#else
         result = malloc(INPLINEMAX); /* should be sufficient */
+#endif
         NUMERICTYPE("format");
         sprintf(result, format, width, prec, stk->u.num);
         UNARY(STRING_NEWNODE, result);
@@ -681,7 +691,11 @@ static void formatf_()
         }
         strcpy(format, "%*.*lg");
         format[5] = spec;
+#ifdef GC_BDW
+        result = GC_malloc_atomic(INPLINEMAX);
+#else
         result = malloc(INPLINEMAX); /* should be sufficient */
+#endif
         FLOAT("formatf");
         sprintf(result, format, width, prec, stk->u.dbl);
         UNARY(STRING_NEWNODE, result);
@@ -691,7 +705,7 @@ static void formatf_()
 /* - - -   TIME   - - - */
 
 #define UNMKTIME(PROCEDURE, NAME, FUNC)                                        \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 struct tm *t;                                                  \
                 long wday;                                                     \
@@ -800,7 +814,11 @@ static void strftime_()
         LIST("strftime");
         decode_time(&t);
         length = strlen(fmt) * 3 + 1; /* should be sufficient */
+#ifdef GC_BDW
+        result = GC_malloc_atomic(length);
+#else
         result = malloc(length);
+#endif
         strftime(result, length, fmt, &t);
         UNARY(STRING_NEWNODE, result);
         return;
@@ -809,7 +827,7 @@ static void strftime_()
 /* - - -   FLOAT   - - - */
 
 #define UFLOAT(PROCEDURE, NAME, FUNC)                                          \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 FLOAT(NAME);                                                   \
@@ -834,7 +852,7 @@ UFLOAT(tan_, "tan", tan)
 UFLOAT(tanh_, "tanh", tanh)
 
 #define BFLOAT(PROCEDURE, NAME, FUNC)                                          \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 FLOAT2(NAME);                                                  \
@@ -887,7 +905,7 @@ static void trunc_()
 /* - - -   NUMERIC   - - - */
 
 #define PREDSUCC(PROCEDURE, NAME, OPER)                                        \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 NUMERICTYPE(NAME);                                             \
@@ -905,7 +923,7 @@ PREDSUCC(pred_, "pred", -)
 PREDSUCC(succ_, "succ", +)
 
 #define PLUSMINUS(PROCEDURE, NAME, OPER)                                       \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 FLOAT_I(OPER);                                                 \
@@ -927,7 +945,7 @@ PLUSMINUS(plus_, "+", +)
 PLUSMINUS(minus_, "-", -)
 
 #define MAXMIN(PROCEDURE, NAME, OPER)                                          \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 if (FLOATABLE2)                                                \
@@ -958,7 +976,7 @@ MAXMIN(max_, "max", <)
 MAXMIN(min_, "min", >)
 
 #define COMPREL(PROCEDURE, NAME, CONSTRUCTOR, OPR)                             \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 long comp = 0;                                                 \
                 TWOPARAMS(NAME);                                               \
@@ -1092,7 +1110,7 @@ static void frename_()
 }
 
 #define FILEGET(PROCEDURE, NAME, CONSTRUCTOR, EXPR)                            \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 FILE(NAME);                                                    \
@@ -1114,7 +1132,11 @@ static void fgets_()
         FILE("fgets");
         for (;;)
         {
+#ifdef GC_BDW
+                buff = GC_realloc(buff, size);
+#else
                 buff = realloc(buff, size);
+#endif
                 if (fgets(buff + length, size - length, stk->u.fil) == NULL)
                 {
                         buff[length] = 0;
@@ -1179,14 +1201,20 @@ static void fread_()
         count = stk->u.num;
         POP(stk);
         FILE("fread");
+#ifdef GC_BDW
+        buf = GC_malloc_atomic(count);
+#else
         buf = malloc(count);
+#endif
         dump1 = LIST_NEWNODE(NULL, dump1);
         for (count = fread(buf, (size_t)1, (size_t)count, stk->u.fil) - 1;
              count >= 0; count--)
         {
                 DMP1 = INTEGER_NEWNODE((long)buf[count], DMP1);
         }
+#ifndef GC_BDW
         free(buf);
+#endif
         UNARY(LIST_NEWNODE, DMP1);
         POP(dump1);
         return;
@@ -1207,7 +1235,11 @@ static void fwrite_()
                         execerror("numeric list", "fwrite");
                 }
         }
+#ifdef GC_BDW
+        buff = GC_malloc_atomic(length);
+#else
         buff = malloc(length);
+#endif
         for (n = stk->u.lis, i = 0; n; n = n->next, i++)
         {
                 buff[i] = n->u.num;
@@ -1301,7 +1333,9 @@ static void rest_()
                         return;
                 }
                 default:
+                {
                         BADAGGREGATE("rest");
+                }
         }
 }
 
@@ -1358,7 +1392,9 @@ static void unswons_()
                         long set = stk->u.set;
                         CHECKEMPTYSET(set, "unswons");
                         while (!(set & (1 << i)))
+                        {
                                 i++;
+                        }
                         UNARY(SET_NEWNODE, set & ~(1 << i));
                         NULLARY(INTEGER_NEWNODE, i);
                         break;
@@ -1372,14 +1408,18 @@ static void unswons_()
                         break;
                 }
                 case LIST_:
+                {
                         SAVESTACK;
                         CHECKEMPTYLIST(SAVED1->u.lis, "unswons");
                         UNARY(LIST_NEWNODE, SAVED1->u.lis->next);
                         GNULLARY(SAVED1->u.lis->op, SAVED1->u.lis->u);
                         POP(dump);
                         return;
+                }
                 default:
+                {
                         BADAGGREGATE("unswons");
+                }
         }
 }
 
@@ -1456,7 +1496,7 @@ static void equal_()
 }
 
 #define INHAS(PROCEDURE, NAME, AGGR, ELEM)                                     \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 int found = 0;                                                 \
                 TWOPARAMS(NAME);                                               \
@@ -1499,7 +1539,7 @@ INHAS(in_, "in", stk, stk->next)
 INHAS(has_, "has", stk->next, stk)
 
 #define OF_AT(PROCEDURE, NAME, AGGR, INDEX)                                    \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 if (INDEX->op != INTEGER_ || INDEX->u.num < 0)                 \
@@ -1558,7 +1598,9 @@ INHAS(has_, "has", stk->next, stk)
                                 return;                                        \
                         }                                                      \
                         default:                                               \
+                        {                                                      \
                                 BADAGGREGATE(NAME);                            \
+                        }                                                      \
                 }                                                              \
         }
 
@@ -1622,6 +1664,15 @@ static void opcase_()
         UNARY(LIST_NEWNODE, n->next != NULL ? n->u.lis->next : n->u.lis);
 }
 
+static char *consswons_malloc(size_t i)
+{
+#ifdef GC_BDW
+        return (char *)GC_malloc_atomic(i);
+#else
+        return (char *)malloc(i);
+#endif
+}
+
 #define CONS_SWONS(PROCEDURE, NAME, AGGR, ELEM)                                \
         static void PROCEDURE()                                               \
         {                                                                      \
@@ -1649,14 +1700,16 @@ static void opcase_()
                                 {                                              \
                                         execerror("character", NAME);          \
                                 }                                              \
-                                s = (char *)malloc(strlen(AGGR->u.str) + 2);   \
+                                s = consswons_malloc(strlen(AGGR->u.str) + 2); \
                                 s[0] = ELEM->u.num;                            \
                                 strcpy(s + 1, AGGR->u.str);                    \
                                 BINARY(STRING_NEWNODE, s);                     \
                                 break;                                         \
                         }                                                      \
                         default:                                               \
+                        {                                                      \
                                 BADAGGREGATE(NAME);                            \
+                        }                                                      \
                 }                                                              \
         }
 
@@ -1711,7 +1764,9 @@ static void drop_()
                         return;
                 }
                 default:
+                {
                         BADAGGREGATE("drop");
+                }
         }
 }
 
@@ -1758,7 +1813,12 @@ static void take_()
                         {
                                 return; /* the old string unchanged */
                         }
+#ifdef GC_BDW
+                        p = result = (char *)GC_malloc_atomic(strlen(old) - i
+                                                              + 1);
+#else
                         p = result = (char *)malloc(strlen(old) - i + 1);
+#endif
                         while (i-- > 0)
                         {
                                 *p++ = *old++;
@@ -1801,7 +1861,9 @@ static void take_()
                         return;
                 }
                 default:
+                {
                         BADAGGREGATE("take");
+                }
         }
 }
 
@@ -1812,13 +1874,21 @@ static void concat_()
         switch (stk->op)
         {
                 case SET_:
+                {
                         BINARY(SET_NEWNODE, stk->next->u.set | stk->u.set);
                         return;
+                }
                 case STRING_:
                 {
                         char *s, *p;
+#ifdef GC_BDW
+                        s = p = (char *)GC_malloc_atomic(
+                                strlen(stk->next->u.str) + strlen(stk->u.str)
+                                + 1);
+#else
                         s = p = (char *)malloc(strlen(stk->next->u.str)
                                                + strlen(stk->u.str) + 1);
+#endif
                         while ((*p++ = *(stk->next->u.str)++) != '\0')
                                 ;
                         --p; /* don't want terminating null */
@@ -1828,6 +1898,7 @@ static void concat_()
                         return;
                 }
                 case LIST_:
+                {
                         if (stk->next->u.lis == NULL)
                         {
                                 BINARY(LIST_NEWNODE, stk->u.lis);
@@ -1857,8 +1928,11 @@ static void concat_()
                         POP(dump2);
                         POP(dump3);
                         return;
+                }
                 default:
+                {
                         BADAGGREGATE("concat");
+                }
         }
 }
 
@@ -1877,16 +1951,24 @@ static void null_()
         switch (stk->op)
         {
                 case STRING_:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(*(stk->u.str) == '\0'));
                         break;
+                }
                 case FLOAT_:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(stk->u.dbl == 0.0));
                         break;
+                }
                 case FILE_:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(stk->u.fil == NULL));
                         break;
+                }
                 default:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(!stk->u.num));
+                }
         }
 }
 
@@ -1896,19 +1978,27 @@ static void not_()
         switch (stk->op)
         {
                 case SET_:
+                {
                         UNARY(SET_NEWNODE, ~stk->u.set);
                         break;
+                }
                 case STRING_:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(*(stk->u.str) != '\0'));
                         break;
+                }
                 case BOOLEAN_:
                 case CHAR_:
                 case INTEGER_:
                 case LIST_:
+                {
                         UNARY(BOOLEAN_NEWNODE, (long)(!stk->u.num));
                         break;
+                }
                 default:
+                {
                         BADDATA("not");
+                }
         }
 }
 
@@ -1931,8 +2021,10 @@ static void size_()
                         break;
                 }
                 case STRING_:
+                {
                         siz = strlen(stk->u.str);
                         break;
+                }
                 case LIST_:
                 {
                         Node *e = stk->u.lis;
@@ -1944,7 +2036,9 @@ static void size_()
                         break;
                 }
                 default:
+                {
                         BADDATA("size");
+                }
         }
         UNARY(INTEGER_NEWNODE, siz);
 }
@@ -1957,9 +2051,12 @@ static void small_()
         {
                 case BOOLEAN_:
                 case INTEGER_:
+                {
                         sml = stk->u.num < 2;
                         break;
+                }
                 case SET_:
+                {
                         if (stk->u.set == 0)
                         {
                                 sml = 1;
@@ -1971,24 +2068,32 @@ static void small_()
                                 {
                                         i++;
                                 }
-                        D(?rintf("small: first member found is %d\n",i));
-                        sml = (stk->u.set & ~(1 << i)) == 0;
+                                D(printf("small: first member found is %d\n",
+                                         i));
+                                sml = (stk->u.set & ~(1 << i)) == 0;
                         }
                         break;
+                }
                 case STRING_:
+                {
                         sml = stk->u.str[0] == '\0' || stk->u.str[1] == '\0';
                         break;
+                }
                 case LIST_:
+                {
                         sml = stk->u.lis == NULL || stk->u.lis->next == NULL;
                         break;
+                }
                 default:
+                {
                         BADDATA("small");
+                }
         }
         UNARY(BOOLEAN_NEWNODE, sml);
 }
 
 #define TYPE(PROCEDURE, NAME, REL, TYP)                                        \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 UNARY(BOOLEAN_NEWNODE, (long)(stk->op REL TYP));               \
@@ -2006,7 +2111,7 @@ TYPE(file_, "file", ==, FILE_)
 TYPE(user_, "user", ==, USR_)
 
 #define USETOP(PROCEDURE, NAME, TYPE, BODY)                                    \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 ONEPARAM(NAME);                                                \
                 TYPE(NAME);                                                    \
@@ -2025,7 +2130,7 @@ USETOP(srand_, "srand", INTEGER, srand((unsigned int)stk->u.num))
 USETOP(include_, "include", STRING, doinclude(stk->u.str))
 USETOP(system_, "system", STRING, system(stk->u.str))
 
-static void undefs_(void)
+static void undefs_()
 {
         Entry *i = symtabindex;
         Node *n = 0;
@@ -2060,13 +2165,12 @@ static void get_()
         readfactor();
 }
 
-void dummy_(void)
+void dummy_()
 {
-        /* never called */
 }
 
 #define HELP(PROCEDURE, REL)                                                   \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 Entry *i = symtabindex;                                        \
                 int column = 0;                                                \
@@ -2120,9 +2224,12 @@ start:
                         case SET_:
                         case STRING_:
                         case LIST_:
+                        {
                                 stk = newnode(stepper->op, stepper->u, stk);
                                 break;
+                        }
                         case USR_:
+                        {
                                 if (stepper->u.ent->u.body == NULL
                                     && undeferror)
                                 {
@@ -2140,17 +2247,22 @@ start:
                                         exeterm(stepper->u.ent->u.body);
                                 }
                                 break;
+                        }
                         case COPIED_:
                         case ILLEGAL_:
+                        {
                                 printf("exeterm: attempting to execute bad "
                                        "node\n");
                                 printnode(stepper);
                                 break;
+                        }
                         default:
+                        {
                                 D(printf("trying to do "));
                                 D(writefactor(dump1, stdout));
                                 (*(stepper->u.proc))();
                                 break;
+                        }
                 }
                 if (tracegc > 5)
                 {
@@ -2194,7 +2306,7 @@ static void dip_()
 }
 
 #define N_ARY(PROCEDURE, NAME, PARAMCOUNT, TOP)                                \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 PARAMCOUNT(NAME);                                              \
                 ONEQUOTE(NAME);                                                \
@@ -2265,16 +2377,17 @@ static void app1_()
 }
 
 static void cleave_()
-{ /*  X [P1] [P2] cleave ==>  X1 X2	*/
+{
+        /* X [P1] [P2] cleave ==> X1 X2 */
         THREEPARAMS("cleave");
         TWOQUOTES("cleave");
         SAVESTACK;
         stk = SAVED3;
-        exeterm(SAVED2->u.lis);                  /* [P1]		*/
-        dump1 = newnode(stk->op, stk->u, dump1); /*  X1		*/
+        exeterm(SAVED2->u.lis);                  /* [P1] */
+        dump1 = newnode(stk->op, stk->u, dump1); /* X1 */
         stk = SAVED3;
-        exeterm(SAVED1->u.lis);                  /* [P2]		*/
-        dump1 = newnode(stk->op, stk->u, dump1); /*  X2		*/
+        exeterm(SAVED1->u.lis);                  /* [P2] */
+        dump1 = newnode(stk->op, stk->u, dump1); /* X2 */
         stk = dump1;
         dump1 = dump1->next->next;
         stk->next->next = SAVED4;
@@ -2290,7 +2403,8 @@ static void app11_()
 }
 
 static void unary2_()
-{ /*   Y  Z  [P]  unary2     ==>  Y'  Z'  */
+{
+        /* Y Z [P] unary2 ==> Y' Z' */
         THREEPARAMS("unary2");
         ONEQUOTE("unary2");
         SAVESTACK;
@@ -2307,7 +2421,8 @@ static void unary2_()
 }
 
 static void unary3_()
-{ /*  X Y Z [P]  unary3    ==>  X' Y' Z'	*/
+{
+        /* X Y Z [P] unary3 ==> X' Y' Z' */
         FOURPARAMS("unary3");
         ONEQUOTE("unary3");
         SAVESTACK;
@@ -2327,7 +2442,8 @@ static void unary3_()
 }
 
 static void unary4_()
-{ /*  X Y Z W [P]  unary4    ==>  X' Y' Z' W'	*/
+{
+        /* X Y Z W [P] unary4 ==> X' Y' Z' W' */
         FIVEPARAMS("unary4");
         ONEQUOTE("unary4");
         SAVESTACK;
@@ -2351,7 +2467,7 @@ static void unary4_()
 
 static void app12_()
 {
-        /*   X  Y  Z  [P]  app12  */
+        /* X  Y  Z  [P]  app12 */
         THREEPARAMS("app12");
         unary2_();
         stk->next->next = stk->next->next->next; /* delete X */
@@ -2398,8 +2514,13 @@ static void map_()
                 {
                         char *s, *resultstring;
                         int j = 0;
+#ifdef GC_BDW
+                        resultstring = (char *)GC_malloc_atomic(
+                                strlen(SAVED2->u.str) + 1);
+#else
                         resultstring
                             = (char *)malloc(strlen(SAVED2->u.str) + 1);
+#endif
                         for (s = SAVED2->u.str; *s != '\0'; s++)
                         {
                                 stk = CHAR_NEWNODE((long)*s, SAVED3);
@@ -2468,11 +2589,13 @@ static void step_()
                 {
                         long i;
                         for (i = 0; i < SETSIZE; i++)
+                        {
                                 if (SAVED2->u.set & (1 << i))
                                 {
                                         stk = INTEGER_NEWNODE(i, stk);
                                         exeterm(SAVED1->u.lis);
                                 }
+                        }
                         break;
                 }
                 default:
@@ -2523,7 +2646,7 @@ static void cond_()
 }
 
 #define IF_TYPE(PROCEDURE, NAME, TYP)                                          \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 TWOPARAMS(NAME);                                               \
                 TWOQUOTES(NAME);                                               \
@@ -2573,8 +2696,14 @@ static void filter_()
                 {
                         char *s, *resultstring;
                         int j = 0;
+#ifdef GC_BDW
+                        resultstring
+                            = (char *)GC_malloc_atomic(
+                                    strlen(SAVED2->u.str) + 1);
+#else
                         resultstring
                             = (char *)malloc(strlen(SAVED2->u.str) + 1);
+#endif
                         for (s = SAVED2->u.str; *s != '\0'; s++)
                         {
                                 stk = CHAR_NEWNODE((long)*s, SAVED3);
@@ -2664,8 +2793,15 @@ static void split_()
                 {
                         char *s, *yesstring, *nostring;
                         int yesptr = 0, noptr = 0;
+#ifdef GC_BDW
+                        yesstring = (char *)GC_malloc_atomic(
+                                strlen(SAVED2->u.str) + 1);
+                        nostring = (char *)GC_malloc_atomic(
+                                strlen(SAVED2->u.str) + 1);
+#else
                         yesstring = (char *)malloc(strlen(SAVED2->u.str) + 1);
                         nostring = (char *)malloc(strlen(SAVED2->u.str) + 1);
+#endif
                         for (s = SAVED2->u.str; *s != '\0'; s++)
                         {
                                 stk = CHAR_NEWNODE((long)*s, SAVED3);
@@ -2743,8 +2879,9 @@ static void split_()
         }
         POP(dump);
 }
+
 #define SOMEALL(PROCEDURE, NAME, INITIAL)                                      \
-        static void PROCEDURE()                                               \
+        static void PROCEDURE()                                                \
         {                                                                      \
                 long result = INITIAL;                                         \
                 TWOPARAMS(NAME);                                               \
@@ -2912,21 +3049,22 @@ static void tailrec_()
 }
 
 static void construct_()
-{ /* [P] [[P1] [P2] ..] -> X1 X2 ..	*/
+{
+        /* [P] [[P1] [P2] ..] -> X1 X2 .. */
         TWOPARAMS("construct");
         TWOQUOTES("construct");
         SAVESTACK;
-        stk = SAVED3;                             /* pop progs		*/
-        dump1 = LIST_NEWNODE(dump2, dump1);       /* save dump2		*/
-        dump2 = stk;                              /* save old stack	*/
-        exeterm(SAVED2->u.lis);                   /* [P]		*/
+        stk = SAVED3;                             /* pop progs */
+        dump1 = LIST_NEWNODE(dump2, dump1);       /* save dump2 */
+        dump2 = stk;                              /* save old stack */
+        exeterm(SAVED2->u.lis);                   /* [P] */
         dump3 = LIST_NEWNODE(stk, dump3);         /* save current stack	*/
-        dump4 = newnode(LIST_, SAVED1->u, dump4); /* step [..]	*/
+        dump4 = newnode(LIST_, SAVED1->u, dump4); /* step [..] */
         while (DMP4 != NULL)
         {
-                stk = DMP3; /* restore new stack	*/
+                stk = DMP3; /* restore new stack */
                 exeterm(DMP4->u.lis);
-                dump2 = newnode(stk->op, stk->u, dump2); /* result	*/
+                dump2 = newnode(stk->op, stk->u, dump2); /* result */
                 DMP4 = DMP4->next;
         }
         POP(dump4);
@@ -3183,9 +3321,9 @@ static void treerecaux()
         if (stk->next->op == LIST_)
         {
                 NULLARY(LIST_NEWNODE, ANON_FUNCT_NEWNODE(treerecaux, NULL));
-                cons_(); /*  D  [[[O] C] ANON_FUNCT_]	*/
-                D(printf("treerecaux: stack = ");)
-                D(writeterm(stk, stdout); printf("\n");)
+                cons_(); /* D [[[O] C] ANON_FUNCT_] */
+                D(printf("treerecaux: stack = "));
+                D(writeterm(stk, stdout); printf("\n"));
                 exeterm(stk->u.lis->u.lis->next);
         }
         else
@@ -3200,32 +3338,32 @@ static void treerec_()
 {
         THREEPARAMS("treerec");
         cons_();
-        D(printf("deep: stack = "); writeterm(stk, stdout); printf("\n");)
+        D(printf("deep: stack = "); writeterm(stk, stdout); printf("\n"));
         treerecaux();
 }
 
 static void genrecaux()
 {
         int result;
-        D(printf("genrecaux: stack = ");)
-        D(writeterm(stk, stdout); printf("\n");)
+        D(printf("genrecaux: stack = "));
+        D(writeterm(stk, stdout); printf("\n"));
         SAVESTACK;
         POP(stk);
-        exeterm(SAVED1->u.lis->u.lis); /*	[I]	*/
+        exeterm(SAVED1->u.lis->u.lis); /* [I] */
         result = stk->u.num;
         stk = SAVED2;
         if (result)
         {
-                exeterm(SAVED1->u.lis->next->u.lis); /*	[T]	*/
+                exeterm(SAVED1->u.lis->next->u.lis); /* [T] */
         }
         else
         {
-                exeterm(SAVED1->u.lis->next->next->u.lis); /*	[R1]	*/
+                exeterm(SAVED1->u.lis->next->next->u.lis); /* [R1] */
                 NULLARY(LIST_NEWNODE, SAVED1->u.lis);
                 NULLARY(LIST_NEWNODE, ANON_FUNCT_NEWNODE(genrecaux, NULL));
                 cons_();
                 exeterm(SAVED1->u.lis->next->next->next);
-        } /*   [R2]	*/
+        } /* [R2] */
         POP(dump);
 }
 
@@ -3245,25 +3383,26 @@ static void treegenrecaux()
         D(writeterm(stk, stdout); printf("\n");)
         if (stk->next->op == LIST_)
         {
-                SAVESTACK; /* begin DIP	*/
+                SAVESTACK; /* begin DIP */
                 POP(stk);
-                exeterm(SAVED1->u.lis->next->u.lis); /*	[O2]	*/
+                exeterm(SAVED1->u.lis->next->u.lis); /*	[O2] */
                 GNULLARY(SAVED1->op, SAVED1->u);
-                POP(dump); /*   end DIP	*/
+                POP(dump); /* end DIP */
                 NULLARY(LIST_NEWNODE, ANON_FUNCT_NEWNODE(treegenrecaux, NULL));
                 cons_();
                 exeterm(stk->u.lis->u.lis->next->next);
-        } /*	[C]	*/
+        } /* [C] */
         else
         {
                 Node *n = stk;
                 POP(stk);
                 exeterm(n->u.lis->u.lis);
-        } /*	[O1]	*/
+        } /* [O1] */
 }
 
 static void treegenrec_()
-{ /* T [O1] [O2] [C]	*/
+{
+        /* T [O1] [O2] [C] */
         FOURPARAMS("treegenrec");
         cons_();
         cons_();
@@ -4049,7 +4188,7 @@ static struct
 
         {0, dummy_, "->", "->"}};
 
-void inisymboltable(void) /* initialise			*/
+void inisymboltable() /* initialise			*/
 {
         int i;
         char *s;
@@ -4111,49 +4250,64 @@ static void helpdetail_()
 #define HTML (style == 1)
 #define LATEX (style == 2)
 
-#define HEADER(N, NAME, HEAD)                                                  \
-        if (strcmp(N, NAME) == 0)                                              \
-        {                                                                      \
-                printf("\n\n");                                                \
-                if (LATEX)                                                     \
-                {                                                              \
-                        printf("\\item[--- \\BX{");                            \
-                }                                                              \
-                printf("%s", HEAD);                                            \
-                if (LATEX)                                                     \
-                {                                                              \
-                        printf("} ---] \\verb# #");                            \
-                }                                                              \
-                printf("\n\n");                                                \
-        }
-
-static void make_manual(int style /* 0=plain, 1=HTML, 2=Latex */)
+static void print_header(int style, char *header)
 {
-        int i;
+                printf("\n\n");
+                if (LATEX)
+                {
+                        printf("\\item[--- \\BX{");
+                }
+                printf("%s", header);
+                if (LATEX)
+                {
+                        printf("} ---] \\verb# #");
+                }
+                printf("\n\n");
+}
+
+/*
+ * 0=plain, 1=HTML, 2=Latex
+*/
+static void make_manual(int style)
+{
         char *n;
         if (HTML)
+        {
                 printf("<HTML>\n<DL>\n");
-        for (i = BOOLEAN_; optable[i].name != 0; i++)
+        }
+        for (int i = BOOLEAN_; optable[i].name != 0; i++)
         {
                 n = optable[i].name;
-                HEADER(n, " truth value type", "literal")
-                else HEADER(n, "false", "operand") else HEADER(
-                    n, "id",
-                    "operat"
-                    "o"
-                    "r") else HEADER(n, "null",
-                                     "predicate") else HEADER(n, "i",
-                                                              "combinato"
-                                                              "r") else HEADER(n,
-                                                                               "help",
-                                                                               "miscell"
-                                                                               "aneous "
-                                                                               "command"
-                                                                               "s") if (n[0]
-                                                                                        != '_')
+                if (strcmp(n, " truth value type") == 0)
+                {
+                        print_header(style, "literal");
+                }
+                else if (strcmp(n, "false") == 0)
+                {
+                        print_header(style, "operand");
+                }
+                else if (strcmp(n, "id") == 0)
+                {
+                        print_header(style, "operator");
+                }
+                else if (strcmp(n, "null") == 0)
+                {
+                        print_header(style, "predicate");
+                }
+                else if(strcmp(n, "i") == 0)
+                {
+                        print_header(style, "combinator");
+                }
+                else if (strcmp(n, "help") == 0)
+                {
+                        print_header(style, "miscellaneous commands");
+                }
+                if (n[0] != '_')
                 {
                         if (HTML)
+                        {
                                 printf("\n<DT>");
+                        }
                         else if (LATEX)
                         {
                                 if (n[0] == ' ')
@@ -4162,35 +4316,55 @@ static void make_manual(int style /* 0=plain, 1=HTML, 2=Latex */)
                                         printf("\\item[\\BX{");
                                 }
                                 else
+                                {
                                         printf("\\item[\\JX{");
+                                }
                         }
                         if (HTML && strcmp(n, "<=") == 0)
+                        {
                                 printf("&lt;=");
+                        }
                         else
+                        {
                                 printf("%s", n);
+                        }
                         if (LATEX)
+                        {
                                 printf("}]  \\verb#");
+                        }
                         if (HTML)
+                        {
                                 printf(" <CODE>      :  </CODE> ");
-                        /* the above line does not produce the spaces around ":"
-                         */
+                        }
                         else
+                        {
                                 printf("      :  ");
+                        }
                         printf("%s", optable[i].messg1);
                         if (HTML)
+                        {
                                 printf("\n<DD>");
+                        }
                         else if (LATEX)
+                        {
                                 printf("# \\\\ \n {\\small\\verb#");
+                        }
                         else
+                        {
                                 printf("\n");
+                        }
                         printf("%s", optable[i].messg2);
                         if (LATEX)
+                        {
                                 printf("#}");
+                        }
                         printf("\n\n");
                 }
         }
         if (HTML)
+        {
                 printf("\n</DL>\n</HTML>\n");
+        }
 }
 
 static void manual_list_()

@@ -10,24 +10,21 @@
 
 #ifdef GC_BDW
 #include "gc/gc.h"
-/*
- * These are defined for when the program is built without the GC.
- */
-#define malloc GC_malloc_atomic
-#define realloc GC_realloc
-#define free(X)
 #endif
 
 #include "utils.c"
 #include "scan.c"
 #include "interp.c"
 
-
 static void enterglobal()
 {
         location = symtabindex++;
         D(printf("getsym, new: '%s'\n", id));
+#ifdef GC_BDW
+        location->name = (char *)GC_malloc_atomic(strlen(id) + 1);
+#else
         location->name = (char *)malloc(strlen(id) + 1);
+#endif
         strcpy(location->name, id);
         location->u.body = NULL; /* may be assigned in definition */
         location->next = hashentry[hashvalue];
@@ -35,11 +32,10 @@ static void enterglobal()
         hashentry[hashvalue] = location;
 }
 
-void lookup(void)
+void lookup()
 {
         int i;
         D(printf("%s  hashes to %d\n", id, hashvalue));
-
         for (i = display_lookup; i > 0; --i)
         {
                 location = display[i];
@@ -52,7 +48,6 @@ void lookup(void)
                         return;
                 }
         }
-
         location = hashentry[hashvalue];
         while (location != symtab && strcmp(id, location->name) != 0)
         {
@@ -71,7 +66,11 @@ static void enteratom()
                 location = symtabindex++;
                 D(printf("hidden definition '%s' at %ld \n", id,
                          LOC2INT(location)));
+#ifdef GC_BDW
+                location->name = (char *)GC_malloc_atomic(strlen(id) + 1);
+#else
                 location->name = (char *)malloc(strlen(id) + 1);
+#endif
                 strcpy(location->name, id);
                 location->u.body = NULL; /* may be assigned later */
                 location->next = display[display_enter];
@@ -84,6 +83,7 @@ static void enteratom()
 }
 
 static void defsequence();
+
 static void compound_def();
 
 static void definition()
@@ -93,13 +93,16 @@ static void definition()
         {
                 compound_def();
                 if (sym == END || sym == PERIOD)
+                {
                         getsym();
+                }
                 else
+                {
                         error(" END or period '.' expected in compound "
                               "definition");
+                }
                 return;
         }
-
         if (sym != ATOM)
         {
                 // NOW ALLOW EMPTY DEFINITION:
@@ -107,7 +110,6 @@ static void definition()
                 // abortexecution_();
                 return;
         }
-
         /* sym == ATOM : */
         enteratom();
         if (location < firstlibra)
@@ -118,9 +120,13 @@ static void definition()
         here = location;
         getsym();
         if (sym == EQDEF)
+        {
                 getsym();
+        }
         else
+        {
                 error(" == expected in definition");
+        }
         readterm();
         D(printf("assigned this body: "));
         D(writeterm(stk->u.lis, stdout));
@@ -173,9 +179,9 @@ static void compound_def()
                 case HIDE:
                 {
                         getsym();
-                        if (display_lookup
-                            > display_enter) /* already inside module or hide */
+                        if (display_lookup > display_enter)
                         {
+                                /* already inside module or hide */
                                 Entry *oldplace = display[display_lookup];
                                 // printf("lookup =
                                 // %d\n",LOC2INT(display[display_lookup]));
@@ -221,13 +227,13 @@ static void compound_def()
 jmp_buf begin;
 jmp_buf fail;
 
-void abortexecution_(void)
+void abortexecution_()
 {
         conts = dump = dump1 = dump2 = dump3 = dump4 = dump5 = NULL;
         longjmp(begin, 0);
 }
 
-void fail_(void)
+void fail_()
 {
         longjmp(fail, 1);
 }
@@ -238,10 +244,10 @@ void execerror(char *message, char *op)
         abortexecution_();
 }
 
-static int quit_quiet
-    = 1; /* was = 0;  but anything with "clock" needs revision */
+/* was = 0;  but anything with "clock" needs revision */
+static int quit_quiet = 1;
 
-void quit_(void)
+void quit_()
 {
         long totaltime;
         if (quit_quiet)
@@ -275,7 +281,6 @@ int main(int argc, char **argv)
         g_argv = argv;
         if (argc > 1)
         {
-                // FILE *f;
                 g_argc--;
                 g_argv++;
                 srcfile = fopen(argv[1], "r");
@@ -288,18 +293,15 @@ int main(int argc, char **argv)
         else
         {
                 srcfile = stdin;
-
 #ifdef GC_BDW
-                printf("Rejoice 0.0.1 BDW\n");
+                printf("Rejoice 0.0.1 GC=BDW\n");
 #else
-                printf("Rejoice 0.0.1\n");
+                printf("Rejoice 0.0.1 GC=Custom\n");
 #endif
         }
-
 #ifdef GC_BDW
         GC_INIT();
 #endif
-
         startclock = clock();
         gc_clock = 0;
         echoflag = INIECHOFLAG;

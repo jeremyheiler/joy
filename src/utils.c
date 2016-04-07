@@ -1,22 +1,50 @@
 #ifndef GC_BDW
-static Node memory[MEMORYMAX], *memoryindex = memory, *mem_low = memory,
-                               *mem_mid;
+
+/* The highest memory index available. */
 #define MEM_HIGH (MEMORYMAX - 1)
-static int direction = +1;
-static int nodesinspected, nodescopied;
+
+/* The array of available memory */
+static Node memory[MEMORYMAX];
+
+/* ? */
+static Node *memoryindex = memory;
+
+/* ? */
+static Node *mem_low = memory;
+
+/* ? */
+static Node *mem_mid;
+
+/* ? The direction memory is growing, either +1 or -1 */
+static int direction = 1;
+
+/* ? */
+static int nodesinspected;
+
+/* ? */
+static int nodescopied;
+
+/* ? */
 static int start_gc_clock;
+
 #endif
 
-void inimem1(void)
+/*
+ * ?
+ */
+void inimem1()
 {
         stk = conts = dump = dump1 = dump2 = dump3 = dump4 = dump5 = NULL;
 #ifndef GC_BDW
-        direction = +1;
+        direction = 1;
         memoryindex = mem_low;
 #endif
 }
 
-void inimem2(void)
+/*
+ * ?
+ */
+void inimem2()
 {
 #ifndef GC_BDW
         mem_low = memoryindex;
@@ -36,6 +64,9 @@ void inimem2(void)
 #endif
 }
 
+/*
+ * ?
+ */
 void printnode(Node *p)
 {
 #ifndef GC_BDW
@@ -46,7 +77,10 @@ void printnode(Node *p)
 }
 
 #ifndef GC_BDW
-static Node *copy(n) Node *n;
+/**
+ * ? Recursively copies the given node and returns the copy.
+ */
+static Node *copy(Node *n)
 {
         Node *temp;
         nodesinspected++;
@@ -66,7 +100,7 @@ static Node *copy(n) Node *n;
         {
                 printf("copy: illegal node  ");
                 printnode(n);
-                return (NULL);
+                return NULL;
         }
         if (n->op == COPIED_)
         {
@@ -81,25 +115,39 @@ static Node *copy(n) Node *n;
         switch (n->op)
         {
                 case INTEGER_:
+                {
                         temp->u.num = n->u.num;
                         break;
+                }
                 case SET_:
+                {
                         temp->u.set = n->u.set;
                         break;
+                }
                 case STRING_:
+                {
                         temp->u.str = n->u.str;
                         break;
+                }
                 case FLOAT_:
+                {
                         temp->u.dbl = n->u.dbl;
                         break;
+                }
                 case FILE_:
+                {
                         temp->u.fil = n->u.fil;
                         break;
+                }
                 case LIST_:
+                {
                         temp->u.num = (long)copy(n->u.lis);
                         break;
+                }
                 default:
+                {
                         temp->u.num = n->u.num;
+                }
         }
         /* end of replacement */
         temp->next = copy(n->next);
@@ -116,23 +164,10 @@ static Node *copy(n) Node *n;
 #endif
 
 #ifndef GC_BDW
-static void gc1(mess) char *mess;
-{
-        start_gc_clock = clock();
-        if (tracegc > 1)
-        {
-                printf("begin %s garbage collection\n", mess);
-        }
-        direction = -direction;
-        memoryindex = (direction == 1) ? mem_low : &memory[MEM_HIGH];
-        /*
-            if (tracegc > 1)
-              { printf("direction = %d\n",direction);
-                printf("memoryindex = %d : %d\n",
-                        (long)memoryindex,MEM2INT(memoryindex)); }
-        */
-        nodesinspected = nodescopied = 0;
 
+/*
+ * ?
+ */
 #define COP(X, NAME)                                                           \
         if (X != NULL)                                                         \
         {                                                                      \
@@ -150,6 +185,26 @@ static void gc1(mess) char *mess;
                         printf("\n");                                          \
                 }                                                              \
         }
+
+/*
+ * ?
+ */
+static void gc1(char *mess)
+{
+        start_gc_clock = clock();
+        if (tracegc > 1)
+        {
+                printf("begin %s garbage collection\n", mess);
+        }
+        direction = -direction;
+        memoryindex = (direction == 1) ? mem_low : &memory[MEM_HIGH];
+        /*
+            if (tracegc > 1)
+              { printf("direction = %d\n",direction);
+                printf("memoryindex = %d : %d\n",
+                        (long)memoryindex,MEM2INT(memoryindex)); }
+        */
+        nodesinspected = nodescopied = 0;
         COP(stk, "stk");
         COP(prog, "prog");
         COP(conts, "conts");
@@ -161,35 +216,57 @@ static void gc1(mess) char *mess;
         COP(dump5, "dump5");
 }
 
-static void gc2(mess) char *mess;
+/*
+ * ?
+ */
+static void gc2(char *mess)
 {
         int this_gc_clock;
         this_gc_clock = clock() - start_gc_clock;
         if (this_gc_clock == 0)
+        {
                 this_gc_clock = 1; /* correction */
+        }
         if (tracegc > 0)
+        {
                 printf("gc - %d nodes inspected, %d nodes copied, clock: %d\n",
                        nodesinspected, nodescopied, this_gc_clock);
+        }
         if (tracegc > 1)
+        {
                 printf("end %s garbage collection\n", mess);
+        }
         gc_clock += this_gc_clock;
 }
+
 #endif
 
-void gc_(void)
+/*
+ * Run the garbage collector.
+ */
+void gc_()
 {
-#ifndef GC_BDW
+#ifdef GC_BDW
+        GC_gcollect();
+#else
         gc1("user requested");
         gc2("user requested");
-#else
-        GC_gcollect();
 #endif
 }
 
+/*
+ * ? Construct a new node.
+ */
 Node *newnode(Operator o, Types u, Node *r)
 {
         Node *p;
-#ifndef GC_BDW
+#ifdef GC_BDW
+        p = GC_malloc(sizeof(Node));
+        if (!p)
+        {
+                execerror("memory", "allocator");
+        }
+#else
         if (memoryindex == mem_mid)
         {
                 gc1("automatic");
@@ -202,33 +279,33 @@ Node *newnode(Operator o, Types u, Node *r)
         }
         p = memoryindex;
         memoryindex += direction;
-#else
-        p = GC_malloc(sizeof(Node));
-        if (!p)
-        {
-                execerror("memory", "allocator");
-        }
 #endif
         p->op = o;
         p->u = u;
         p->next = r;
-        D(printnode(p);)
+        D(printnode(p));
         return p;
 }
 
-void memoryindex_(void)
+/*
+ * ? Construct a new stack.
+ */
+void memoryindex_()
 {
-#ifndef GC_BDW
-        stk = INTEGER_NEWNODE((long)MEM2INT(memoryindex), stk);
-#else
+#ifdef GC_BDW
         stk = INTEGER_NEWNODE(0L, stk);
+#else
+        stk = INTEGER_NEWNODE((long)MEM2INT(memoryindex), stk);
 #endif
 }
 
-static void readmodule_field(void)
+/*
+ * ?
+ */
+static void readmodule_field()
 {
         Entry *p;
-        D(printf("Module %s at %d\n", location->name, (long)location));
+        D(printf("Module %s at %ld\n", location->name, (long)location));
         D(p = location->u.module_fields);
         D(while (p) {
                 printf("%s\n", p->name);
@@ -264,11 +341,15 @@ static void readmodule_field(void)
         return;
 }
 
-void readfactor(void) /* read a JOY factor */
+/*
+ * ?
+ */
+void readfactor() /* read a JOY factor */
 {
         switch (sym)
         {
                 case ATOM:
+                {
                         lookup();
                         D(printf("readfactor: location = %ld\n",
                                  (long)location));
@@ -296,7 +377,7 @@ void readfactor(void) /* read a JOY factor */
                                         return;
                                 }
                                 lookup();
-                                D(printf("looking for field %s\n", id);)
+                                D(printf("looking for field %s\n", id));
                                 while (mod_fields
                                        && strcmp(id, mod_fields->name) != 0)
                                 {
@@ -308,7 +389,7 @@ void readfactor(void) /* read a JOY factor */
                                         abortexecution_();
                                 }
                                 D(printf("found field: %s\n",
-                                         mod_fields->name);)
+                                         mod_fields->name));
                                 location = mod_fields;
                         }
                         /* end of replacement */
@@ -322,16 +403,21 @@ void readfactor(void) /* read a JOY factor */
                                 stk = USR_NEWNODE(location, stk);
                         }
                         return;
+                }
                 case BOOLEAN_:
                 case INTEGER_:
                 case CHAR_:
                 case STRING_:
+                {
                         bucket.num = num;
                         stk = newnode(sym, bucket, stk);
                         return;
+                }
                 case FLOAT_:
+                {
                         stk = FLOAT_NEWNODE(dbl, stk);
                         return;
+                }
                 case LBRACE:
                 {
                         long set = 0;
@@ -375,7 +461,11 @@ void readfactor(void) /* read a JOY factor */
                 }
         }
 }
-void readterm(void)
+
+/*
+ * ?
+ */
+void readterm()
 {
         stk = LIST_NEWNODE(0L, stk);
         if (sym <= ATOM)
@@ -399,6 +489,9 @@ void readterm(void)
         }
 }
 
+/*
+ * ?
+ */
 void writefactor(Node *n, FILE *stm)
 {
         if (n == NULL)
@@ -495,6 +588,10 @@ void writefactor(Node *n, FILE *stm)
                 }
         }
 }
+
+/*
+ * ?
+ */
 void writeterm(Node *n, FILE *stm)
 {
         while (n != NULL)

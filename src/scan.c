@@ -1,19 +1,39 @@
 #define EOLN '\n'
 
+/* ? */
 static FILE *infile[INPSTACKMAX];
+
+/* ? */
 static int ilevel;
+
+/* ? */
 static int linenumber = 0;
+
+/* ? */
 static char linbuf[INPLINEMAX];
-static int linelength, currentcolumn = 0;
+
+/* ? */
+static int linelength;
+
+/* ? */
+static int currentcolumn = 0;
+
+/* ? */
 static int errorcount = 0;
 
-void inilinebuffer(void)
+/*
+ * ?
+ */
+void inilinebuffer()
 {
         ilevel = 0;
         infile[ilevel] = srcfile;
 }
 
-void putline(void)
+/*
+ * ?
+ */
+void putline()
 {
         if (echoflag > 2)
         {
@@ -26,12 +46,15 @@ void putline(void)
         printf("%s\n", linbuf);
 }
 
+/*
+ * ?
+ */
 static void getch()
 {
         char c;
         if (currentcolumn == linelength)
         {
-        again:
+    again:
                 currentcolumn = 0;
                 linelength = 0;
                 linenumber++;
@@ -56,6 +79,7 @@ static void getch()
                 }
                 if (linbuf[0] == SHELLESCAPE)
                 {
+                        /* Why is system being called? */
                         system(&linbuf[1]);
                         goto again;
                 }
@@ -63,11 +87,17 @@ static void getch()
         ch = linbuf[currentcolumn++];
 }
 
-int endofbuffer(void)
+/*
+ * ?
+ */
+int endofbuffer()
 {
         return (currentcolumn == linelength);
 }
 
+/*
+ * ?
+ */
 void error(char *message)
 {
         int i;
@@ -91,6 +121,9 @@ void error(char *message)
         errorcount++;
 }
 
+/*
+ * ?
+ */
 int doinclude(char *filnam)
 {
         if (ilevel + 1 == INPSTACKMAX)
@@ -100,12 +133,15 @@ int doinclude(char *filnam)
         if ((infile[ilevel + 1] = fopen(filnam, "r")) != NULL)
         {
                 ilevel++;
-                return (1);
+                return 1;
         }
         execerror("valid file name", "include");
         return 0;
 }
 
+/*
+ * ?
+ */
 static char specialchar()
 {
         getch();
@@ -126,6 +162,7 @@ static char specialchar()
                 case '\"':
                         return '\"';
                 default:
+                {
                         if (ch >= '0' && ch <= '9')
                         {
                                 int i;
@@ -149,10 +186,14 @@ static char specialchar()
                         {
                                 return ch;
                         }
+                }
         }
 }
 
-void getsym(void)
+/*
+ * ?
+ */
+void getsym()
 {
 start:
         while (ch <= ' ')
@@ -230,14 +271,20 @@ start:
                         while (ch != '"' && !endofbuffer())
                         {
                                 if (ch == '\\')
+                                {
                                         ch = specialchar();
+                                }
                                 string[i++] = ch;
                                 getch();
                         }
                         string[i] = '\0';
                         getch();
-                        D(printf("getsym: string = %s\n", string);)
+                        D(printf("getsym: string = %s\n", string));
+#ifdef GC_BDW
+                        num = (long)GC_malloc_atomic(strlen(string) + 1);
+#else
                         num = (long)malloc(strlen(string) + 1);
+#endif
                         strcpy((char *)num, string);
                         sym = STRING_;
                         return;
@@ -337,8 +384,8 @@ start:
                                 }
                                 /* possibly other uppers here */
                         }
-                        if (strcmp(id, "!")
-                            == 0) /* should this remain or be deleted ? */
+                        /* should this remain or be deleted ? */
+                        if (strcmp(id, "!") == 0)
                         {
                                 sym = PERIOD;
                                 return;

@@ -1,6 +1,7 @@
 CFLAGS=-std=c99 -Wall -Wextra -pedantic -Isrc -lm
 SRC=src/main.c
-GC=/usr/local/opt/bdw-gc/lib/libgc.a -I/usr/local/opt/bdw-gc/include
+#GC=/usr/local/opt/bdw-gc/lib/libgc.a -I/usr/local/opt/bdw-gc/include
+GC=-L/usr/local/opt/bdw-gc/lib -lgc -I/usr/local/opt/bdw-gc/include
 EXE=rjc
 
 all:

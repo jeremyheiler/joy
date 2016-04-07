@@ -142,29 +142,29 @@ Node /* dynamic memory	*/
 */
 
 /* Public procedures: */
-void stack_(void);
-void dummy_(void);
+void stack_();
+void dummy_();
 void exeterm(Node *n);
-void inisymboltable(void) /* initialise			*/;
+void inisymboltable() /* initialise			*/;
 char *opername(int o);
-void lookup(void);
-void abortexecution_(void);
+void lookup();
+void abortexecution_();
 void execerror(char *message, char *op);
-void quit_(void);
-void inilinebuffer(void);
-void putline(void);
-int endofbuffer(void);
+void quit_();
+void inilinebuffer();
+void putline();
+int endofbuffer();
 void error(char *message);
 int doinclude(char *filnam);
-void getsym(void);
-void inimem1(void);
-void inimem2(void);
+void getsym();
+void inimem1();
+void inimem2();
 void printnode(Node *p);
-void gc_(void);
+void gc_();
 Node *newnode(Operator o, Types u, Node *r);
-void memoryindex_(void);
-void readfactor(void) /* read a JOY factor		*/;
-void readterm(void);
+void memoryindex_();
+void readfactor() /* read a JOY factor		*/;
+void readterm();
 void writefactor(Node *n, FILE *stm);
 void writeterm(Node *n, FILE *stm);
 
